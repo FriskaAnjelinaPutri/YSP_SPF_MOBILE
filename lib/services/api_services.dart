@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Gunakan 10.0.2.2 untuk emulator Android, ganti dengan IP PC untuk real device
-  static const String baseUrl = "http://10.237.26.124:8000/api";
+  static const String baseUrl = "http://127.0.0.1:8001/api";
 
   // 🔹 Helper decode JSON aman
   static dynamic _parseJson(String source) {
@@ -129,53 +129,5 @@ class ApiService {
     }
   }
 
-  // 🔹 ABSEN MASUK
-  static Future<Map<String, dynamic>?> absenMasuk(String token) async {
-    try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/absensi/check-in"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Accept": "application/json",
-        },
-      ).timeout(const Duration(seconds: 10));
 
-      final data = _parseJson(response.body);
-
-      if (response.statusCode == 200 && data != null) {
-        return data;
-      } else {
-        print("❌ Gagal absen masuk: ${response.statusCode} - ${data?['message'] ?? response.body}");
-        return null;
-      }
-    } catch (e) {
-      print("⚠️ Error absenMasuk: $e");
-      return null;
-    }
-  }
-
-  // 🔹 ABSEN PULANG
-  static Future<Map<String, dynamic>?> absenPulang(String token) async {
-    try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/absensi/check-out"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Accept": "application/json",
-        },
-      ).timeout(const Duration(seconds: 10));
-
-      final data = _parseJson(response.body);
-
-      if (response.statusCode == 200 && data != null) {
-        return data;
-      } else {
-        print("❌ Gagal absen pulang: ${response.statusCode} - ${data?['message'] ?? response.body}");
-        return null;
-      }
-    } catch (e) {
-      print("⚠️ Error absenPulang: $e");
-      return null;
-    }
-  }
 }
