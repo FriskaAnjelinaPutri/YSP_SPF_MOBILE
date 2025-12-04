@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'absen_masuk_screen.dart';
-import 'absen_keluar_screen.dart';
-import 'akun_screen.dart';
+import 'package:apk_absebsi/screens/akun_screen.dart';
 import 'package:intl/intl.dart';
-
-// Tambahan screen lain
-import 'cuti_list_screen.dart';
-import 'lembur_list_screen.dart';
+import 'package:apk_absebsi/screens/cuti_list_screen.dart';
+import 'package:apk_absebsi/screens/lembur_list_screen.dart';
+import 'package:apk_absebsi/screens/absen_masuk_screen.dart';
+import 'package:apk_absebsi/screens/absen_keluar_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String namaPegawai;
@@ -110,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 22),
 
-          // CLOCK IN CARD
+          // CLOCK IN/OUT BUTTONS
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(22),
@@ -123,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.blue.withOpacity(0.3),
+                  color: Colors.blue.withAlpha((255 * 0.3).round()),
                   blurRadius: 14,
                   offset: const Offset(0, 5),
                 )
@@ -151,32 +149,60 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 const SizedBox(height: 18),
-                SizedBox(
-                  width: 160,
-                  height: 45,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              AbsenMasukScreen(token: widget.token),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SizedBox(
+                      width: 130,
+                      height: 45,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AbsenMasukScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.blue.shade700,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.blue.shade700,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        child: const Text(
+                          "Clock In",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      "Clock In",
-                      style:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    SizedBox(
+                      width: 130,
+                      height: 45,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AbsenKeluarScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.blue.shade700,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          "Clock Out",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -206,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha((255 * 0.05).round()),
               blurRadius: 10,
               offset: const Offset(0, 4)),
         ],
