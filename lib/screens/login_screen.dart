@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../services/api_services.dart';
 import 'home_screen.dart';
@@ -37,7 +38,6 @@ class _LoginScreenState extends State<LoginScreen> {
         response['data'] != null &&
         response['data']['access_token'] != null) {
       final prefs = await SharedPreferences.getInstance();
-
       await prefs.setString('token', response['data']['access_token']);
 
       final userData = response['data']['user'];
@@ -68,165 +68,260 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1565C0), Color(0xFF42A5F5)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOut,
-              width: size.width * 0.9,
-              constraints: const BoxConstraints(maxWidth: 420),
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(22),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 20,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 10),
+      backgroundColor: const Color(0xFFE9F8EE),
+
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(30),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+              child: Container(
+                width: 420,
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.white.withOpacity(0.55),
+                      Colors.white.withOpacity(0.18),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.4),
+                    width: 1.3,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.15),
+                      blurRadius: 22,
+                      offset: const Offset(0, 10),
                     ),
-                    child: const Icon(Icons.local_hospital,
-                        size: 70, color: Colors.blue),
-                  ),
+                  ],
+                ),
 
-                  const SizedBox(height: 14),
-
-                  const Text(
-                    "ABSENSI RUMAH SAKIT",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0D47A1),
-                      letterSpacing: 1.3,
-                    ),
-                  ),
-
-                  const SizedBox(height: 35),
-
-                  TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      prefixIcon:
-                      const Icon(Icons.email_outlined, color: Colors.blue),
-                      labelText: "Email",
-                      filled: true,
-                      fillColor: Colors.grey.shade100,
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 18, horizontal: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.green.withOpacity(0.18),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.5),
+                          width: 1.2,
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide:
-                        const BorderSide(color: Colors.blue, width: 1.5),
+                      child: const Icon(
+                        Icons.verified_user_rounded,
+                        size: 62,
+                        color: Color(0xFF15803D),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 16),
 
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      prefixIcon:
-                      const Icon(Icons.lock_outline, color: Colors.blue),
-                      suffixIcon: IconButton(
+                    const Text(
+                      "Employee Login",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF14532D),
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Text(
+                      "Attendance & Workforce System",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    _glassField(
+                      controller: _emailController,
+                      label: "Email Address",
+                      icon: Icons.email_outlined,
+                      obscure: false,
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    _glassField(
+                      controller: _passwordController,
+                      label: "Password",
+                      icon: Icons.lock_outline,
+                      obscure: _obscurePassword,
+                      suffix: IconButton(
                         icon: Icon(
                           _obscurePassword
                               ? Icons.visibility_off
                               : Icons.visibility,
-                          color: Colors.grey,
+                          color: Colors.grey.shade600,
                         ),
                         onPressed: () =>
                             setState(() => _obscurePassword = !_obscurePassword),
                       ),
-                      labelText: "Password",
-                      filled: true,
-                      fillColor: Colors.grey.shade100,
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 18, horizontal: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide:
-                        const BorderSide(color: Colors.blue, width: 1.5),
-                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 30),
+                    const SizedBox(height: 32),
 
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _login,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.65),
+                          elevation: 3,
+                          shadowColor: Colors.green.withOpacity(0.18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
                         ),
-                      ),
-                      child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                        "LOGIN",
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.1,
+                        child: _isLoading
+                            ? const CircularProgressIndicator(
+                          color: Color(0xFF14532D),
+                        )
+                            : const Text(
+                          "Sign In",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF14532D),
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 18),
+                    const SizedBox(height: 22),
 
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      "Lupa password?",
+                    Text(
+                      "© 2025 Semen Padang Hospital",
                       style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
                       ),
                     ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // =======================================================================
+  // GLASS FIELD WIDGET
+  // =======================================================================
+  Widget _glassField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required bool obscure,
+    Widget? suffix,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.10),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.38),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.55),
+                width: 1.1,
+              ),
+            ),
+            child: TextField(
+              controller: controller,
+              obscureText: obscure,
+              cursorColor: const Color(0xFF15803D),
+              style: const TextStyle(
+                fontSize: 15,
+                color: Color(0xFF064E3B),
+                fontWeight: FontWeight.w500,
+              ),
+
+              decoration: InputDecoration(
+                contentPadding:
+                const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+
+                labelText: label,
+                floatingLabelStyle: const TextStyle(
+                  color: Color(0xFF14532D),
+                  fontWeight: FontWeight.bold,
+                ),
+                labelStyle: TextStyle(
+                  fontSize: 15,
+                  color: Colors.green.shade800.withOpacity(0.75),
+                  fontWeight: FontWeight.w600,
+                ),
+
+                prefixIcon: Container(
+                  margin: const EdgeInsets.only(left: 14, right: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE3F8EF),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                ],
+                  padding: const EdgeInsets.all(10),
+                  child: Icon(
+                    icon,
+                    size: 20,
+                    color: const Color(0xFF15803D),
+                  ),
+                ),
+
+                suffixIcon: suffix,
+
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.15),
+
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(
+                    color: Colors.green.withOpacity(0.20),
+                    width: 1,
+                  ),
+                ),
+
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF15803D),
+                    width: 1.7,
+                  ),
+                ),
+
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
           ),

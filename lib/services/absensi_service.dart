@@ -59,7 +59,7 @@ class AbsensiService {
     } catch (e) {
       print("⚠️ Error getAbsensi: $e");
       return null;
-    }
+     }
   }
 
   static Future<Absensi?> getAbsensiDetail(String token, String karKode, String tanggal) async {
