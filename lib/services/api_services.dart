@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   // Gunakan 10.0.2.2 untuk emulator Android, ganti dengan IP PC untuk real device
-  static const String baseUrl = "http://192.168.18.65:8000/api";
+  static const String baseUrl = "http://127.0.0.1:8000/api";
 
   // 🔹 Helper decode JSON aman
   static dynamic _parseJson(String source) {
