@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../services/api_services.dart';
 import 'edit_data_screen.dart';
@@ -29,15 +30,16 @@ class _AkunScreenState extends State<AkunScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final accentColor = Colors.teal.shade400;
+    const mainGreen = Color(0xFF14532D);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: const Color(0xFFE9F8EE),
+
       body: FutureBuilder<Map<String, dynamic>?>(
         future: _karyawanFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(color: mainGreen));
           }
 
           if (snapshot.hasError) {
@@ -56,82 +58,101 @@ class _AkunScreenState extends State<AkunScreen> {
           final kar = snapshot.data!;
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: 25),
 
                 // ============================
-                // Header
+                // HEADER GLASS
                 // ============================
-                const Text(
-                  "Profil Karyawan",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-
-                // Foto profil / initial
-                CircleAvatar(
-                  radius: 45,
-                  backgroundColor: accentColor,
-                  child: Text(
-                    (kar['kar_nama'] ?? '?')
-                        .toString()
-                        .substring(0, 1)
-                        .toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-                Text(
-                  kar['kar_nama'] ?? '-',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                ElevatedButton(
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => EditDataScreen(
-                          token: widget.token,
-                          karyawanData: kar,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(26),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withOpacity(0.60),
+                            Colors.white.withOpacity(0.20),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(26),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.4),
+                          width: 1.3,
                         ),
                       ),
-                    );
+                      child: Column(
+                        children: [
+                          // Glass Avatar
+                          _glassAvatar(kar['kar_nama'] ?? '?'),
 
-                    // Refresh jika berhasil update
-                    if (result == true) _refreshData();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: accentColor,
-                    elevation: 0,
-                    side: BorderSide(color: accentColor),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                          const SizedBox(height: 12),
+
+                          Text(
+                            kar['kar_nama'] ?? '-',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                              color: mainGreen,
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          SizedBox(
+                            height: 44,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => EditDataScreen(
+                                      token: widget.token,
+                                      karyawanData: kar,
+                                    ),
+                                  ),
+                                );
+
+                                if (result == true) _refreshData();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white.withOpacity(0.65),
+                                elevation: 0,
+                                shadowColor: Colors.green.withOpacity(0.25),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  side: const BorderSide(color: mainGreen),
+                                ),
+                              ),
+                              child: const Text(
+                                "Edit Profil",
+                                style: TextStyle(
+                                  color: mainGreen,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  child: const Text("Edit Profil"),
                 ),
 
                 const SizedBox(height: 30),
 
                 // ============================
-                // Informasi Pribadi
+                // SECTION GLASS CARDS
                 // ============================
-                _buildSection("Informasi Pribadi", [
+                _glassSection("Informasi Pribadi", [
                   _infoItem("Kode Karyawan", kar['kar_kode']),
                   _infoItem("NIK", kar['kar_nik']),
                   _infoItem("NIP", kar['kar_nip']),
@@ -141,12 +162,9 @@ class _AkunScreenState extends State<AkunScreen> {
                   _infoItem("Alamat", kar['kar_alamat']),
                 ]),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                // ============================
-                // Informasi Kontak
-                // ============================
-                _buildSection("Informasi Kontak", [
+                _glassSection("Informasi Kontak", [
                   _infoItem("Email Pribadi", kar['kar_email']),
                   _infoItem("Email Perusahaan", kar['kar_email_perusahaan']),
                   _infoItem("No HP", kar['kar_hp']),
@@ -154,41 +172,42 @@ class _AkunScreenState extends State<AkunScreen> {
                   _infoItem("Telegram", kar['kar_telegram']),
                 ]),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                // ============================
-                // Informasi Administratif
-                // ============================
-                _buildSection("Informasi Administratif", [
+                _glassSection("Informasi Administratif", [
                   _infoItem("Nomor Rekening", kar['kar_norek']),
                   _infoItem("No BPJS", kar['kar_nobpjs']),
                   _infoItem("No Jamsostek", kar['kar_nojamsostek']),
                   _infoItem("NPWP", kar['kar_npwp']),
                 ]),
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 26),
 
                 // ============================
-                // Tombol Logout
+                // LOGOUT GLASS BUTTON
                 // ============================
-                OutlinedButton.icon(
-                  onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.remove('token');
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/login', (route) => false);
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    side: const BorderSide(color: Colors.red),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.remove('token');
+                        Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(160, 48),
+                        foregroundColor: Colors.red.shade700,
+                        side: BorderSide(color: Colors.red.shade700),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      icon: const Icon(Icons.logout),
+                      label: const Text("Logout"),
                     ),
                   ),
-                  icon: const Icon(Icons.logout),
-                  label: const Text("Logout"),
                 ),
 
                 const SizedBox(height: 40),
@@ -201,40 +220,91 @@ class _AkunScreenState extends State<AkunScreen> {
   }
 
   // ============================
-  // Widget section container
+  // GLASS AVATAR
   // ============================
-  Widget _buildSection(String title, List<Widget> children) {
-    return Card(
-      elevation: 3,
-      shadowColor: Colors.teal.shade100,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.teal.shade700,
+  Widget _glassAvatar(String name) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(60),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.35),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withOpacity(0.4),
+              width: 1.4,
+            ),
+          ),
+          child: CircleAvatar(
+            radius: 40,
+            backgroundColor: Colors.green.withOpacity(0.22),
+            child: Text(
+              name.isNotEmpty ? name[0].toUpperCase() : '?',
+              style: const TextStyle(
+                fontSize: 34,
+                color: Color(0xFF14532D),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 12),
-            ...children,
-          ],
+          ),
         ),
       ),
     );
   }
 
   // ============================
-  // Widget item label + value
+  // GLASS SECTION CARD
+  // ============================
+  Widget _glassSection(String title, List<Widget> children) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.55),
+                Colors.white.withOpacity(0.18),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.4),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF14532D),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...children,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ============================
+  // INFO ITEM
   // ============================
   Widget _infoItem(String label, dynamic value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -243,15 +313,18 @@ class _AkunScreenState extends State<AkunScreen> {
             child: Text(
               label,
               style: const TextStyle(
-                fontWeight: FontWeight.w600,
                 color: Colors.black87,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value?.toString().isNotEmpty == true ? value.toString() : "-",
-              style: const TextStyle(color: Colors.black87),
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 15,
+              ),
             ),
           ),
         ],

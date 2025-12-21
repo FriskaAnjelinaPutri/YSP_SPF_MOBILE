@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class CutiService {
-  // ✅ Ganti sesuai IP Backend kamu
   static const String baseUrl = "http://10.237.26.124:8000/api";
 
   // ✅ Ambil semua riwayat cuti berdasarkan kar_kode
@@ -11,10 +10,7 @@ class CutiService {
 
     final response = await http.get(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-      },
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
     final body = jsonDecode(response.body);
@@ -65,10 +61,7 @@ class CutiService {
 
     final response = await http.get(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-      },
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
     final body = jsonDecode(response.body);
@@ -90,10 +83,7 @@ class CutiService {
 
     final response = await http.delete(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-      },
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
     final body = jsonDecode(response.body);

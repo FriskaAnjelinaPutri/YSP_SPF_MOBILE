@@ -8,17 +8,12 @@ class LemburService {
   // 1️⃣ RIWAYAT LEMBUR
   // Route Laravel: GET /lembur/riwayat/all
   // ============================================================
-  static Future<List<dynamic>> getRiwayat({
-    required String token,
-  }) async {
+  static Future<List<dynamic>> getRiwayat({required String token}) async {
     final url = Uri.parse('$baseUrl/lembur/riwayat/all');
 
     final response = await http.get(
       url,
-      headers: {
-        "Authorization": "Bearer $token",
-        "Accept": "application/json",
-      },
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
     );
 
     final body = jsonDecode(response.body);
@@ -65,10 +60,7 @@ class LemburService {
 
     final response = await http.get(
       url,
-      headers: {
-        "Authorization": "Bearer $token",
-        "Accept": "application/json",
-      },
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
     );
 
     final body = jsonDecode(response.body);
@@ -92,10 +84,7 @@ class LemburService {
 
     final response = await http.delete(
       url,
-      headers: {
-        "Authorization": "Bearer $token",
-        "Accept": "application/json",
-      },
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
     );
 
     return jsonDecode(response.body);
