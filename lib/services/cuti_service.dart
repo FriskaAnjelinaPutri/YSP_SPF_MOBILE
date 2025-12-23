@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class CutiService {
   // ✅ Ganti sesuai IP Backend kamu
-  static const String baseUrl = "http://10.0.2.2:8000/api";
+  static const String baseUrl = "http://10.49.153.201:8000/api";
 
   // ✅ Ambil semua riwayat cuti berdasarkan kar_kode
   static Future<List<dynamic>> getAllCuti(String token, String karKode) async {
