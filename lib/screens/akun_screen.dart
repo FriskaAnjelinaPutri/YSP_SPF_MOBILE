@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/api_services.dart';
 import 'edit_data_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../screens/login_screen.dart';
 
 class AkunScreen extends StatefulWidget {
   final String token;
@@ -30,7 +31,7 @@ class _AkunScreenState extends State<AkunScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const mainGreen = Color(0xFF14532D);
+    const mainGreen = Color(0xFF064E3B);
 
     return Scaffold(
       backgroundColor: const Color(0xFFE9F8EE),
@@ -39,7 +40,9 @@ class _AkunScreenState extends State<AkunScreen> {
         future: _karyawanFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator(color: mainGreen));
+            return const Center(
+              child: CircularProgressIndicator(color: mainGreen),
+            );
           }
 
           if (snapshot.hasError) {
@@ -57,161 +60,214 @@ class _AkunScreenState extends State<AkunScreen> {
 
           final kar = snapshot.data!;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 25),
-
-                // ============================
-                // HEADER GLASS
-                // ============================
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(26),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.white.withOpacity(0.60),
-                            Colors.white.withOpacity(0.20),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(26),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.4),
-                          width: 1.3,
-                        ),
+          return Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(32),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                  child: Container(
+                    width: 420,
+                    padding: const EdgeInsets.all(28),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFFD1FAE5).withOpacity(0.95),
+                          const Color(0xFFF0FDF4).withOpacity(0.75),
+                          Colors.white.withOpacity(0.45),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      child: Column(
-                        children: [
-                          // Glass Avatar
-                          _glassAvatar(kar['kar_nama'] ?? '?'),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: const Color(0xFF34D399).withOpacity(0.35),
+                        width: 1.4,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF059669).withOpacity(0.25),
+                          blurRadius: 34,
+                          offset: const Offset(0, 16),
+                        ),
+                      ],
+                    ),
 
-                          const SizedBox(height: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // ================= HEADER =================
+                        _glassAvatar(kar['kar_nama'] ?? '?'),
 
-                          Text(
-                            kar['kar_nama'] ?? '-',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                              color: mainGreen,
+                        const SizedBox(height: 14),
+
+                        Text(
+                          kar['kar_nama'] ?? '-',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: mainGreen,
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        SizedBox(
+                          height: 44,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => EditDataScreen(
+                                    token: widget.token,
+                                    karyawanData: kar,
+                                  ),
+                                ),
+                              );
+
+                              if (result == true) _refreshData();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                              Colors.white.withOpacity(0.65),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                side: const BorderSide(color: mainGreen),
+                              ),
+                            ),
+                            child: const Text(
+                              "Edit Profil",
+                              style: TextStyle(
+                                color: mainGreen,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
+                        ),
 
-                          const SizedBox(height: 14),
+                        const SizedBox(height: 30),
 
-                          SizedBox(
-                            height: 44,
-                            child: ElevatedButton(
+                        // ================= SECTIONS =================
+                        _glassSection("Informasi Pribadi", [
+                          _infoItem("Kode Karyawan", kar['kar_kode']),
+                          _infoItem("NIK", kar['kar_nik']),
+                          _infoItem("NIP", kar['kar_nip']),
+                          _infoItem("Jenis Kelamin", kar['kar_jekel']),
+                          _infoItem("Tempat Lahir", kar['kar_lahir_tmp']),
+                          _infoItem("Tanggal Lahir", kar['kar_lahir_tgl']),
+                          _infoItem("Alamat", kar['kar_alamat']),
+                        ]),
+
+                        const SizedBox(height: 20),
+
+                        _glassSection("Informasi Kontak", [
+                          _infoItem("Email Pribadi", kar['kar_email']),
+                          _infoItem(
+                              "Email Perusahaan", kar['kar_email_perusahaan']),
+                          _infoItem("No HP", kar['kar_hp']),
+                          _infoItem("No WA", kar['kar_wa']),
+                          _infoItem("Telegram", kar['kar_telegram']),
+                        ]),
+
+                        const SizedBox(height: 20),
+
+                        _glassSection("Informasi Administratif", [
+                          _infoItem("Nomor Rekening", kar['kar_norek']),
+                          _infoItem("No BPJS", kar['kar_nobpjs']),
+                          _infoItem(
+                              "No Jamsostek", kar['kar_nojamsostek']),
+                          _infoItem("NPWP", kar['kar_npwp']),
+                        ]),
+
+                        const SizedBox(height: 26),
+
+                        // ================= LOGOUT =================
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: BackdropFilter(
+                            filter:
+                            ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: OutlinedButton.icon(
                               onPressed: () async {
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => EditDataScreen(
-                                      token: widget.token,
-                                      karyawanData: kar,
-                                    ),
-                                  ),
+                                final isLogout = await showDialog<bool>(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.circular(16),
+                                      ),
+                                      title: const Text(
+                                        "Konfirmasi Logout",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      content: const Text(
+                                        "Apakah Anda yakin ingin keluar dari akun ini?",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          child: const Text("Batal"),
+                                        ),
+                                        ElevatedButton(
+                                          style:
+                                          ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                            Colors.red.shade700,
+                                          ),
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          child: const Text("Logout"),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 );
 
-                                if (result == true) _refreshData();
+                                if (isLogout != true) return;
+
+                                final prefs =
+                                await SharedPreferences.getInstance();
+                                await prefs.remove('token');
+
+                                Navigator.of(context)
+                                    .pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                      const LoginScreen()),
+                                      (route) => false,
+                                );
                               },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withOpacity(0.65),
-                                elevation: 0,
-                                shadowColor: Colors.green.withOpacity(0.25),
+                              icon: const Icon(Icons.logout),
+                              label: const Text("Logout"),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize:
+                                const Size(160, 48),
+                                foregroundColor:
+                                Colors.red.shade700,
+                                side: BorderSide(
+                                    color: Colors.red.shade700),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                  side: const BorderSide(color: mainGreen),
-                                ),
-                              ),
-                              child: const Text(
-                                "Edit Profil",
-                                style: TextStyle(
-                                  color: mainGreen,
-                                  fontWeight: FontWeight.bold,
+                                  borderRadius:
+                                  BorderRadius.circular(14),
                                 ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                // ============================
-                // SECTION GLASS CARDS
-                // ============================
-                _glassSection("Informasi Pribadi", [
-                  _infoItem("Kode Karyawan", kar['kar_kode']),
-                  _infoItem("NIK", kar['kar_nik']),
-                  _infoItem("NIP", kar['kar_nip']),
-                  _infoItem("Jenis Kelamin", kar['kar_jekel']),
-                  _infoItem("Tempat Lahir", kar['kar_lahir_tmp']),
-                  _infoItem("Tanggal Lahir", kar['kar_lahir_tgl']),
-                  _infoItem("Alamat", kar['kar_alamat']),
-                ]),
-
-                const SizedBox(height: 20),
-
-                _glassSection("Informasi Kontak", [
-                  _infoItem("Email Pribadi", kar['kar_email']),
-                  _infoItem("Email Perusahaan", kar['kar_email_perusahaan']),
-                  _infoItem("No HP", kar['kar_hp']),
-                  _infoItem("No WA", kar['kar_wa']),
-                  _infoItem("Telegram", kar['kar_telegram']),
-                ]),
-
-                const SizedBox(height: 20),
-
-                _glassSection("Informasi Administratif", [
-                  _infoItem("Nomor Rekening", kar['kar_norek']),
-                  _infoItem("No BPJS", kar['kar_nobpjs']),
-                  _infoItem("No Jamsostek", kar['kar_nojamsostek']),
-                  _infoItem("NPWP", kar['kar_npwp']),
-                ]),
-
-                const SizedBox(height: 26),
-
-                // ============================
-                // LOGOUT GLASS BUTTON
-                // ============================
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: OutlinedButton.icon(
-                      onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.remove('token');
-                        Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-                      },
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(160, 48),
-                        foregroundColor: Colors.red.shade700,
-                        side: BorderSide(color: Colors.red.shade700),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
                         ),
-                      ),
-                      icon: const Icon(Icons.logout),
-                      label: const Text("Logout"),
+
+                        const SizedBox(height: 20),
+                      ],
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 40),
-              ],
+              ),
             ),
           );
         },
@@ -219,9 +275,7 @@ class _AkunScreenState extends State<AkunScreen> {
     );
   }
 
-  // ============================
-  // GLASS AVATAR
-  // ============================
+  // ================= AVATAR =================
   Widget _glassAvatar(String name) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(60),
@@ -239,12 +293,12 @@ class _AkunScreenState extends State<AkunScreen> {
           ),
           child: CircleAvatar(
             radius: 40,
-            backgroundColor: Colors.green.withOpacity(0.22),
+            backgroundColor: const Color(0xFFDCFCE7),
             child: Text(
               name.isNotEmpty ? name[0].toUpperCase() : '?',
               style: const TextStyle(
                 fontSize: 34,
-                color: Color(0xFF14532D),
+                color: Color(0xFF064E3B),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -254,9 +308,7 @@ class _AkunScreenState extends State<AkunScreen> {
     );
   }
 
-  // ============================
-  // GLASS SECTION CARD
-  // ============================
+  // ================= SECTION =================
   Widget _glassSection(String title, List<Widget> children) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
@@ -287,7 +339,7 @@ class _AkunScreenState extends State<AkunScreen> {
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF14532D),
+                  color: Color(0xFF064E3B),
                 ),
               ),
               const SizedBox(height: 12),
@@ -299,9 +351,7 @@ class _AkunScreenState extends State<AkunScreen> {
     );
   }
 
-  // ============================
-  // INFO ITEM
-  // ============================
+  // ================= INFO ITEM =================
   Widget _infoItem(String label, dynamic value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -313,18 +363,15 @@ class _AkunScreenState extends State<AkunScreen> {
             child: Text(
               label,
               style: const TextStyle(
-                color: Colors.black87,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
           Expanded(
             child: Text(
-              value?.toString().isNotEmpty == true ? value.toString() : "-",
-              style: const TextStyle(
-                color: Colors.black87,
-                fontSize: 15,
-              ),
+              value?.toString().isNotEmpty == true
+                  ? value.toString()
+                  : "-",
             ),
           ),
         ],
