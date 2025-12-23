@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class LemburService {
-  static const String baseUrl = "http://10.49.153.201:8000/api";
+  static const String baseUrl = "http://192.168.18.65:8000/api";
 
   // ============================================================
   // 1️⃣ RIWAYAT LEMBUR
