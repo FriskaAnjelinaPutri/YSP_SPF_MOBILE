@@ -6,6 +6,7 @@ import 'package:apk_absebsi/screens/cuti_list_screen.dart';
 import 'package:apk_absebsi/screens/lembur_list_screen.dart';
 import 'package:apk_absebsi/screens/absen_masuk_screen.dart';
 import 'package:apk_absebsi/screens/absen_keluar_screen.dart';
+import 'package:geolocator/geolocator.dart';
 
 class HomeScreen extends StatefulWidget {
   final String namaPegawai;
@@ -28,6 +29,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   late List<Widget> _pages;
+  Position? _currentPosition;
+  String _locationStatus = "Mencari Lokasi...";
+  bool _isFetchingLocation = false;
 
   static const primaryGreen = Color(0xFF064E3B);
   static const softGreen = Color(0xFFDCFCE7);
@@ -36,12 +40,92 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize pages here. The _buildHomePage will be updated via setState.
     _pages = [
       _buildHomePage(),
       CutiListScreen(token: widget.token, karKode: widget.karKode),
       LemburListScreen(token: widget.token),
       AkunScreen(token: widget.token),
     ];
+    // Use a post-frame callback to safely show dialogs after the first frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getCurrentLocation();
+    });
+  }
+
+  Future<void> _getCurrentLocation() async {
+    if (_isFetchingLocation) return;
+
+    if (mounted) {
+      setState(() {
+        _isFetchingLocation = true;
+        _locationStatus = "Mencari Lokasi...";
+      });
+    }
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled && mounted) {
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Layanan Lokasi Nonaktif'),
+            content:
+                const Text('Silakan aktifkan layanan lokasi untuk melanjutkan.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Batal'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await Geolocator.openLocationSettings();
+                  if (mounted) Navigator.pop(context);
+                },
+                child: const Text('Buka Pengaturan'),
+              ),
+            ],
+          ),
+        );
+        // Re-check after the dialog is closed.
+        serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          throw 'Layanan lokasi masih nonaktif.';
+        }
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw 'Izin lokasi ditolak.';
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw 'Izin lokasi ditolak permanen, aplikasi tidak dapat meminta izin.';
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+      if (mounted) {
+        setState(() {
+          _currentPosition = position;
+          _locationStatus = "Lokasi Ditemukan";
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _locationStatus = "Gagal Mendapatkan Lokasi";
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isFetchingLocation = false;
+        });
+      }
+    }
   }
 
   void _onItemTapped(int index) {
@@ -50,6 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Rebuild the home page widget within the build method to pass the latest state.
+    _pages[0] = _buildHomePage();
+
     return Scaffold(
       backgroundColor: const Color(0xFFE9F8EE),
       body: AnimatedSwitcher(
@@ -60,12 +147,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // =========================================================
-  // HOME PAGE
-  // =========================================================
   Widget _buildHomePage() {
-    final formattedDate =
-    DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now());
+    final formattedDate = DateFormat('EEEE, d MMMM yyyy').format(DateTime.now());
     final formattedTime = DateFormat('hh:mm a').format(DateTime.now());
 
     return SingleChildScrollView(
@@ -73,7 +156,6 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // HEADER
           Row(
             children: [
               Expanded(
@@ -84,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       "Welcome 👋",
                       style: TextStyle(
                         fontSize: 15,
-                        color: primaryGreen.withOpacity(0.6),
+                        color: primaryGreen.withAlpha(153), // 0.6
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -102,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       formattedDate,
                       style: TextStyle(
                         fontSize: 14,
-                        color: primaryGreen.withOpacity(0.55),
+                        color: primaryGreen.withAlpha(140), // 0.55
                       ),
                     ),
                   ],
@@ -111,13 +193,9 @@ class _HomeScreenState extends State<HomeScreen> {
               _glassAvatar(widget.namaPegawai),
             ],
           ),
-
           const SizedBox(height: 30),
-
           _glassClockCard(formattedTime),
-
           const SizedBox(height: 28),
-
           Row(
             children: [
               Expanded(
@@ -136,9 +214,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // =========================================================
-  // AVATAR (LOGIN STYLE)
-  // =========================================================
   Widget _glassAvatar(String name) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(50),
@@ -147,21 +222,21 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: softGreen.withOpacity(0.65),
+            color: softGreen.withAlpha(166), // 0.65
             shape: BoxShape.circle,
             border: Border.all(color: accentGreen, width: 1.4),
             boxShadow: [
               BoxShadow(
-                color: primaryGreen.withOpacity(0.25),
+                color: primaryGreen.withAlpha(64), // 0.25
                 blurRadius: 14,
               ),
             ],
           ),
           child: CircleAvatar(
             radius: 28,
-            backgroundColor: Colors.white.withOpacity(0.4),
+            backgroundColor: Colors.white.withAlpha(102), // 0.4
             child: Text(
-              name[0].toUpperCase(),
+              name.isNotEmpty ? name[0].toUpperCase() : '?',
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -174,9 +249,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // =========================================================
-  // CLOCK CARD (MATCH LOGIN CARD)
-  // =========================================================
   Widget _glassClockCard(String time) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(32),
@@ -187,15 +259,15 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                softGreen.withOpacity(0.95),
-                Colors.white.withOpacity(0.45),
+                softGreen.withAlpha(242), // 0.95
+                Colors.white.withAlpha(115), // 0.45
               ],
             ),
             borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: accentGreen.withOpacity(0.35), width: 1.4),
+            border: Border.all(color: accentGreen.withAlpha(89), width: 1.4), // 0.35
             boxShadow: [
               BoxShadow(
-                color: primaryGreen.withOpacity(0.25),
+                color: primaryGreen.withAlpha(64), // 0.25
                 blurRadius: 32,
                 offset: const Offset(0, 14),
               ),
@@ -212,27 +284,50 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 14),
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.location_on,
-                      size: 20, color: primaryGreen),
-                  SizedBox(width: 6),
-                  Text(
-                    "Office - Main Building",
-                    style: TextStyle(
-                      fontSize: 15,
+                  if (_isFetchingLocation)
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.0,
+                        color: primaryGreen,
+                      ),
+                    )
+                  else
+                    Icon(
+                      _currentPosition != null ? Icons.location_on : Icons.location_off,
+                      size: 20,
                       color: primaryGreen,
                     ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      _locationStatus,
+                      style: const TextStyle(fontSize: 15, color: primaryGreen),
+                    ),
                   ),
+                  if (_locationStatus == "Gagal Mendapatkan Lokasi")
+                    TextButton(
+                      onPressed: _getCurrentLocation,
+                      child: const Text(
+                        'Coba Lagi',
+                        style: TextStyle(
+                            color: primaryGreen, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: 26),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _glassButton("Clock In", const AbsenMasukScreen()),
-                  _glassButton("Clock Out", const AbsenKeluarScreen()),
+                  _glassButton(
+                      "Clock In", AbsenMasukScreen(userPosition: _currentPosition)),
+                  _glassButton(
+                      "Clock Out", AbsenKeluarScreen(userPosition: _currentPosition)),
                 ],
               ),
             ],
@@ -247,14 +342,17 @@ class _HomeScreenState extends State<HomeScreen> {
       width: 135,
       height: 52,
       child: ElevatedButton(
-        onPressed: () =>
-            Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
+        onPressed: _currentPosition != null
+            ? () =>
+                Navigator.push(context, MaterialPageRoute(builder: (_) => page))
+            : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: softGreen.withOpacity(0.95),
+          backgroundColor: softGreen.withAlpha(242), // 0.95
           elevation: 4,
-          shadowColor: primaryGreen.withOpacity(0.35),
+          shadowColor: primaryGreen.withAlpha(89), // 0.35
           shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          disabledBackgroundColor: Colors.grey.withAlpha(128), // 0.5
         ),
         child: Text(
           label,
@@ -268,9 +366,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // =========================================================
-  // INFO CARD
-  // =========================================================
   Widget _glassInfoCard(IconData icon, String title, String value) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
@@ -281,19 +376,19 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                softGreen.withOpacity(0.75),
-                Colors.white.withOpacity(0.35),
+                softGreen.withAlpha(191), // 0.75
+                Colors.white.withAlpha(89), // 0.35
               ],
             ),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: accentGreen.withOpacity(0.35)),
+            border: Border.all(color: accentGreen.withAlpha(89)), // 0.35
           ),
           child: Column(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: accentGreen.withOpacity(0.2),
+                  color: accentGreen.withAlpha(51), // 0.2
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(icon, size: 32, color: primaryGreen),
@@ -303,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title,
                 style: TextStyle(
                   fontSize: 14,
-                  color: primaryGreen.withOpacity(0.7),
+                  color: primaryGreen.withAlpha(179), // 0.7
                 ),
               ),
               const SizedBox(height: 6),
@@ -322,9 +417,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // =========================================================
-  // BOTTOM BAR (LOGIN STYLE)
-  // =========================================================
   Widget _buildGlassBottomBar() {
     return ClipRRect(
       child: BackdropFilter(
@@ -333,9 +425,9 @@ class _HomeScreenState extends State<HomeScreen> {
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
           type: BottomNavigationBarType.fixed,
-          backgroundColor: softGreen.withOpacity(0.65),
+          backgroundColor: softGreen.withAlpha(166), // 0.65
           selectedItemColor: primaryGreen,
-          unselectedItemColor: primaryGreen.withOpacity(0.55),
+          unselectedItemColor: primaryGreen.withAlpha(140), // 0.55
           elevation: 0,
           items: const [
             BottomNavigationBarItem(
