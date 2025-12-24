@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class CutiService {
-  static const String baseUrl = "http://10.237.26.124:8000/api";
+  static const String baseUrl = "http://10.49.153.124:8000/api";
 
   // ✅ Ambil semua riwayat cuti berdasarkan kar_kode
   static Future<List<dynamic>> getAllCuti(String token, String karKode) async {
