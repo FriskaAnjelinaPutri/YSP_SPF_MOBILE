@@ -24,6 +24,11 @@ class _CutiAddScreenState extends State<CutiAddScreen> {
   String? selectedJenis;
   bool loading = false;
 
+  // WARNA SESUAI DASHBOARD
+  static const primaryGreen = Color(0xFF064E3B);
+  static const softGreen = Color(0xFFDCFCE7);
+  static const accentGreen = Color(0xFF34D399);
+
   Future<void> _pickDate(TextEditingController controller) async {
     final selected = await showDatePicker(
       context: context,
@@ -68,7 +73,6 @@ class _CutiAddScreenState extends State<CutiAddScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result['message'] ?? "Pengajuan berhasil")),
       );
-
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,16 +85,30 @@ class _CutiAddScreenState extends State<CutiAddScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE9F8EE),
-      appBar: AppBar(
-        title: const Text(
-          "Pengajuan Cuti",
-          style: TextStyle(
-            color: Color(0xFF14532D),
-            fontWeight: FontWeight.bold,
+
+      // =============================
+      //      APPBAR GLASS STYLE
+      // =============================
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: AppBar(
+              backgroundColor: softGreen.withOpacity(0.65),
+              elevation: 0,
+              title: const Text(
+                "Pengajuan Cuti",
+                style: TextStyle(
+                  color: primaryGreen,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 22,
+                ),
+              ),
+              centerTitle: true,
+            ),
           ),
         ),
-        backgroundColor: Colors.white.withOpacity(0.55),
-        elevation: 0,
       ),
 
       body: SingleChildScrollView(
@@ -104,17 +122,25 @@ class _CutiAddScreenState extends State<CutiAddScreen> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.white.withOpacity(0.55),
+                    softGreen.withOpacity(0.75),
                     Colors.white.withOpacity(0.25),
                   ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.30),
-                  width: 1.3,
+                  color: accentGreen.withOpacity(0.35),
+                  width: 1.4,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryGreen.withOpacity(0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -185,10 +211,10 @@ class _CutiAddScreenState extends State<CutiAddScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF15803D),
+                        backgroundColor: accentGreen,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(18),
                         ),
                       ),
                       onPressed: loading ? null : submit,
@@ -215,21 +241,21 @@ class _CutiAddScreenState extends State<CutiAddScreen> {
   InputDecoration _glassInputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, color: const Color(0xFF166534)),
-      labelStyle: const TextStyle(color: Color(0xFF166534)),
+      prefixIcon: Icon(icon, color: primaryGreen),
+      labelStyle: TextStyle(color: primaryGreen),
       filled: true,
       fillColor: Colors.white.withOpacity(0.55),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.green.withOpacity(0.3)),
+        borderSide: BorderSide(color: accentGreen.withOpacity(0.35)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.green.withOpacity(0.3)),
+        borderSide: BorderSide(color: accentGreen.withOpacity(0.35)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFF15803D), width: 2),
+        borderSide: BorderSide(color: primaryGreen, width: 2),
       ),
     );
   }

@@ -86,8 +86,19 @@ class AbsensiService {
     }
   }
 
-  static Future<bool> checkIn(String token, String karKode, double latitude, double longitude) async {
+  static Future<bool> checkIn(String token, String karKode, double latitude, double longitude, String status, String? keterangan) async {
     try {
+      final body = {
+        'kar_kode': karKode,
+        'latitude': latitude,
+        'longitude': longitude,
+        'status': status,
+      };
+
+      if (keterangan != null && keterangan.isNotEmpty) {
+        body['keterangan'] = keterangan;
+      }
+
       final response = await http.post(
         Uri.parse('${ApiService.baseUrl}/absensi/check-in'),
         headers: {
@@ -95,16 +106,12 @@ class AbsensiService {
           'Content-Type': 'application/json',
           "Accept": "application/json",
         },
-        body: json.encode({
-          'kar_kode': karKode,
-          'latitude': latitude,
-          'longitude': longitude,
-        }),
+        body: json.encode(body),
       ).timeout(const Duration(seconds: 10));
 
       final data = _parseJson(response.body);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         print("✅ Check-in berhasil: ${response.body}");
         return true;
       } else {
@@ -117,8 +124,19 @@ class AbsensiService {
     }
   }
 
-  static Future<bool> checkOut(String token, String karKode, double latitude, double longitude) async {
+  static Future<bool> checkOut(String token, String karKode, double latitude, double longitude, String status, String? keterangan) async {
     try {
+      final body = {
+        'kar_kode': karKode,
+        'latitude': latitude,
+        'longitude': longitude,
+        'status': status,
+      };
+
+      if (keterangan != null && keterangan.isNotEmpty) {
+        body['keterangan'] = keterangan;
+      }
+      
       final response = await http.post(
         Uri.parse('${ApiService.baseUrl}/absensi/check-out'),
         headers: {
@@ -126,11 +144,7 @@ class AbsensiService {
           'Content-Type': 'application/json',
           "Accept": "application/json",
         },
-        body: json.encode({
-          'kar_kode': karKode,
-          'latitude': latitude,
-          'longitude': longitude,
-        }),
+        body: json.encode(body),
       ).timeout(const Duration(seconds: 10));
 
       final data = _parseJson(response.body);

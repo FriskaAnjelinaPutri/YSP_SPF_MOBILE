@@ -21,6 +21,11 @@ class CutiListScreen extends StatefulWidget {
 class _CutiListScreenState extends State<CutiListScreen> {
   late Future<List<dynamic>> cuti;
 
+  // WARNA SESUAI DASHBOARD
+  static const primaryGreen = Color(0xFF064E3B);
+  static const softGreen = Color(0xFFDCFCE7);
+  static const accentGreen = Color(0xFF34D399);
+
   @override
   void initState() {
     super.initState();
@@ -39,40 +44,34 @@ class _CutiListScreenState extends State<CutiListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const mainGreen = Color(0xFF14532D);
-
     return Scaffold(
       backgroundColor: const Color(0xFFE9F8EE),
 
       // =============================
-      //      APPBAR PREMIUM
-      // =============================
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        toolbarHeight: 70,
-        leadingWidth: 60,
-        leading: Container(
-          margin: const EdgeInsets.only(left: 16),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.6),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white70, width: 1.2),
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: mainGreen),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-        title: const Text(
-          "Data Cuti",
-          style: TextStyle(
-            color: mainGreen,
-            fontWeight: FontWeight.w800,
-            fontSize: 22,
+//      APPBAR GLASS STYLE
+// =============================
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: AppBar(
+              backgroundColor: softGreen.withOpacity(0.65),
+              elevation: 0,
+              // Hapus leading karena panah tidak dibutuhkan
+              leading: null,
+              title: const Text(
+                "Data Cuti",
+                style: TextStyle(
+                  color: primaryGreen,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 22,
+                ),
+              ),
+              centerTitle: true,
+            ),
           ),
         ),
-        centerTitle: true,
       ),
 
       // =============================
@@ -83,7 +82,7 @@ class _CutiListScreenState extends State<CutiListScreen> {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: FloatingActionButton(
-            backgroundColor: Colors.white.withOpacity(0.55),
+            backgroundColor: softGreen.withOpacity(0.65),
             elevation: 4,
             onPressed: () async {
               final result = await Navigator.push(
@@ -98,7 +97,7 @@ class _CutiListScreenState extends State<CutiListScreen> {
 
               if (result == true) _refresh();
             },
-            child: const Icon(Icons.add, color: mainGreen),
+            child: const Icon(Icons.add, color: primaryGreen),
           ),
         ),
       ),
@@ -111,7 +110,7 @@ class _CutiListScreenState extends State<CutiListScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: mainGreen),
+              child: CircularProgressIndicator(color: primaryGreen),
             );
           }
 
@@ -128,7 +127,7 @@ class _CutiListScreenState extends State<CutiListScreen> {
             return const Center(
               child: Text(
                 "Belum ada pengajuan cuti",
-                style: TextStyle(fontSize: 16, color: mainGreen),
+                style: TextStyle(fontSize: 16, color: primaryGreen),
               ),
             );
           }
@@ -136,7 +135,7 @@ class _CutiListScreenState extends State<CutiListScreen> {
           final data = snapshot.data!;
 
           return RefreshIndicator(
-            color: mainGreen,
+            color: primaryGreen,
             onRefresh: _refresh,
             child: ListView.builder(
               padding: const EdgeInsets.all(18),
@@ -151,17 +150,17 @@ class _CutiListScreenState extends State<CutiListScreen> {
                     leading: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: mainGreen.withOpacity(0.15),
+                        color: accentGreen.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Icon(Icons.calendar_month, color: mainGreen),
+                      child: const Icon(Icons.calendar_month, color: primaryGreen),
                     ),
 
                     title: Text(
                       item["alasan"] ?? "-",
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: mainGreen,
+                        color: primaryGreen,
                         fontSize: 16,
                       ),
                     ),
@@ -218,22 +217,29 @@ class _CutiListScreenState extends State<CutiListScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(22),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.white.withOpacity(0.60),
-                  Colors.white.withOpacity(0.18),
+                  softGreen.withOpacity(0.75),
+                  Colors.white.withOpacity(0.25),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: Colors.white.withOpacity(0.4),
-                width: 1.2,
+                color: accentGreen.withOpacity(0.35),
+                width: 1.4,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: primaryGreen.withOpacity(0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
             child: child,
           ),
