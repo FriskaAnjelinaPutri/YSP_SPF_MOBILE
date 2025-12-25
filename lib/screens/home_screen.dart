@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:apk_absebsi/screens/setting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:apk_absebsi/screens/akun_screen.dart';
 import 'package:intl/intl.dart';
@@ -40,14 +41,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize pages here. The _buildHomePage will be updated via setState.
     _pages = [
       _buildHomePage(),
       CutiListScreen(token: widget.token, karKode: widget.karKode),
       LemburListScreen(token: widget.token),
-      AkunScreen(token: widget.token),
+      SettingScreen(token: widget.token),
     ];
-    // Use a post-frame callback to safely show dialogs after the first frame.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getCurrentLocation();
     });
@@ -87,7 +86,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         );
-        // Re-check after the dialog is closed.
         serviceEnabled = await Geolocator.isLocationServiceEnabled();
         if (!serviceEnabled) {
           throw 'Layanan lokasi masih nonaktif.';
@@ -134,7 +132,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Rebuild the home page widget within the build method to pass the latest state.
     _pages[0] = _buildHomePage();
 
     return Scaffold(
@@ -437,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.access_time_filled), label: "Overtime"),
             BottomNavigationBarItem(
-                icon: Icon(Icons.person_rounded), label: "Profile"),
+                icon: Icon(Icons.settings), label: "Setting"),
           ],
         ),
       ),

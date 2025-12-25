@@ -2,8 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../services/api_services.dart';
 import 'edit_data_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../screens/login_screen.dart';
 
 class AkunScreen extends StatefulWidget {
   final String token;
@@ -35,6 +33,23 @@ class _AkunScreenState extends State<AkunScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFE9F8EE),
+
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          "Profil Saya",
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: mainGreen,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
 
       body: FutureBuilder<Map<String, dynamic>?>(
         future: _karyawanFuture,
@@ -97,7 +112,6 @@ class _AkunScreenState extends State<AkunScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // ================= HEADER =================
                         _glassAvatar(kar['kar_nama'] ?? '?'),
 
                         const SizedBox(height: 14),
@@ -150,7 +164,6 @@ class _AkunScreenState extends State<AkunScreen> {
 
                         const SizedBox(height: 30),
 
-                        // ================= SECTIONS =================
                         _glassSection("Informasi Pribadi", [
                           _infoItem("Kode Karyawan", kar['kar_kode']),
                           _infoItem("NIK", kar['kar_nik']),
@@ -177,92 +190,9 @@ class _AkunScreenState extends State<AkunScreen> {
                         _glassSection("Informasi Administratif", [
                           _infoItem("Nomor Rekening", kar['kar_norek']),
                           _infoItem("No BPJS", kar['kar_nobpjs']),
-                          _infoItem(
-                              "No Jamsostek", kar['kar_nojamsostek']),
+                          _infoItem("No Jamsostek", kar['kar_nojamsostek']),
                           _infoItem("NPWP", kar['kar_npwp']),
                         ]),
-
-                        const SizedBox(height: 26),
-
-                        // ================= LOGOUT =================
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(18),
-                          child: BackdropFilter(
-                            filter:
-                            ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                            child: OutlinedButton.icon(
-                              onPressed: () async {
-                                final isLogout = await showDialog<bool>(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius.circular(16),
-                                      ),
-                                      title: const Text(
-                                        "Konfirmasi Logout",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      content: const Text(
-                                        "Apakah Anda yakin ingin keluar dari akun ini?",
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, false),
-                                          child: const Text("Batal"),
-                                        ),
-                                        ElevatedButton(
-                                          style:
-                                          ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                            Colors.red.shade700,
-                                          ),
-                                          onPressed: () =>
-                                              Navigator.pop(context, true),
-                                          child: const Text("Logout"),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-
-                                if (isLogout != true) return;
-
-                                final prefs =
-                                await SharedPreferences.getInstance();
-                                await prefs.remove('token');
-
-                                Navigator.of(context)
-                                    .pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                      builder: (_) =>
-                                      const LoginScreen()),
-                                      (route) => false,
-                                );
-                              },
-                              icon: const Icon(Icons.logout),
-                              label: const Text("Logout"),
-                              style: OutlinedButton.styleFrom(
-                                minimumSize:
-                                const Size(160, 48),
-                                foregroundColor:
-                                Colors.red.shade700,
-                                side: BorderSide(
-                                    color: Colors.red.shade700),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.circular(14),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
@@ -308,7 +238,6 @@ class _AkunScreenState extends State<AkunScreen> {
     );
   }
 
-  // ================= SECTION =================
   Widget _glassSection(String title, List<Widget> children) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
@@ -323,13 +252,9 @@ class _AkunScreenState extends State<AkunScreen> {
                 Colors.white.withOpacity(0.55),
                 Colors.white.withOpacity(0.18),
               ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.4),
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.4)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,7 +276,6 @@ class _AkunScreenState extends State<AkunScreen> {
     );
   }
 
-  // ================= INFO ITEM =================
   Widget _infoItem(String label, dynamic value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -362,16 +286,12 @@ class _AkunScreenState extends State<AkunScreen> {
             width: 140,
             child: Text(
               label,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
           Expanded(
             child: Text(
-              value?.toString().isNotEmpty == true
-                  ? value.toString()
-                  : "-",
+              value?.toString().isNotEmpty == true ? value.toString() : "-",
             ),
           ),
         ],
