@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:apk_absebsi/screens/helpdesk_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:apk_absebsi/screens/akun_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,7 +67,14 @@ class SettingScreen extends StatelessWidget {
                   icon: Icons.support_agent,
                   title: "Helpdesk",
                   subtitle: "Bantuan & pengaduan",
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => HelpdeskListScreen(token: token),
+                        )
+                    );
+                  },
                 ),
                 const SizedBox(height: 12),
 
