@@ -149,8 +149,8 @@ class _AbsenKeluarScreenState extends State<AbsenKeluarScreen> {
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: const ['a', 'b', 'c'],
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.yspspf.mobile', // Added user agent
             ),
             MarkerLayer(
               markers: [
