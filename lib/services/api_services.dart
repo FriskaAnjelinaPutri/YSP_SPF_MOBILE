@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = "http://10.237.26.124:8000/api";
+  static const String baseUrl = "http://10.101.157.163:8000/api";
 
   // 🔹 Helper decode JSON aman
   static dynamic _parseJson(String source) {

@@ -17,13 +17,9 @@ class AbsenKeluarScreen extends StatefulWidget {
 
 class _AbsenKeluarScreenState extends State<AbsenKeluarScreen> {
   bool _isLoading = false;
-  String? _selectedStatus;
-  final TextEditingController _keteranganController = TextEditingController();
-  final List<String> _statuses = ['Hadir', 'Terlambat', 'Izin', 'Sakit', 'Alpha'];
 
   static const primaryRed = Color(0xFF7F1D1D);
   static const softRed = Color(0xFFFEE2E2);
-  static const accentRed = Color(0xFFF87171);
 
   @override
   void initState() {
@@ -37,12 +33,6 @@ class _AbsenKeluarScreenState extends State<AbsenKeluarScreen> {
       );
       return;
     }
-    if (_selectedStatus == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan pilih status kepulangan.')),
-      );
-      return;
-    }
 
     setState(() {
       _isLoading = true;
@@ -50,9 +40,8 @@ class _AbsenKeluarScreenState extends State<AbsenKeluarScreen> {
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    final karKode = prefs.getString('karKode');
 
-    if (token == null || karKode == null) {
+    if (token == null) {
       if(mounted) {
         setState(() {
           _isLoading = false;
@@ -67,11 +56,8 @@ class _AbsenKeluarScreenState extends State<AbsenKeluarScreen> {
 
     final success = await AbsensiService.checkOut(
       token,
-      karKode,
       widget.userPosition!.latitude,
       widget.userPosition!.longitude,
-      _selectedStatus!,
-      _keteranganController.text,
     );
 
     if (mounted) {
@@ -124,10 +110,6 @@ class _AbsenKeluarScreenState extends State<AbsenKeluarScreen> {
                     _buildInteractiveMap()
                   else
                     _buildLocationError(),
-                  const SizedBox(height: 24),
-                  _buildStatusDropdown(),
-                  const SizedBox(height: 16),
-                  _glassInput("Keterangan (Opsional)", _keteranganController),
                   const SizedBox(height: 30),
                   _glassButton("SUBMIT ABSEN", _submitAbsen),
                 ],
@@ -197,85 +179,6 @@ class _AbsenKeluarScreenState extends State<AbsenKeluarScreen> {
             'Lokasi tidak tersedia dari Home Screen.',
             textAlign: TextAlign.center,
             style: TextStyle(color: primaryRed, fontSize: 16),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusDropdown() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                softRed.withAlpha(204),
-                Colors.white.withAlpha(128),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: accentRed.withAlpha(102)),
-          ),
-          child: DropdownButtonFormField<String>(
-            value: _selectedStatus,
-            items: _statuses.map((String status) {
-              return DropdownMenuItem<String>(
-                value: status,
-                child: Text(status),
-              );
-            }).toList(),
-            onChanged: (newValue) {
-              setState(() {
-                _selectedStatus = newValue;
-              });
-            },
-            decoration: InputDecoration(
-              labelText: 'Status Kepulangan',
-              labelStyle: TextStyle(
-                color: primaryRed.withAlpha(179),
-              ),
-              border: InputBorder.none,
-            ),
-            style: const TextStyle(color: primaryRed, fontWeight: FontWeight.w600),
-            dropdownColor: softRed,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _glassInput(String label, TextEditingController controller) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                softRed.withAlpha(204),
-                Colors.white.withAlpha(128),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: accentRed.withAlpha(102)),
-          ),
-          child: TextField(
-            controller: controller,
-            style: const TextStyle(
-                color: primaryRed, fontWeight: FontWeight.w600),
-            decoration: InputDecoration(
-              labelText: label,
-              labelStyle: TextStyle(
-                color: primaryRed.withAlpha(179),
-              ),
-              border: InputBorder.none,
-            ),
           ),
         ),
       ),

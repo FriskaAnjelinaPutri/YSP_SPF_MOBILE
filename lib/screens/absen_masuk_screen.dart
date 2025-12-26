@@ -50,9 +50,8 @@ class _AbsenMasukScreenState extends State<AbsenMasukScreen> {
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    final karKode = prefs.getString('karKode');
 
-    if (token == null || karKode == null) {
+    if (token == null) {
       if(mounted) {
         setState(() {
           _isLoading = false;
@@ -67,11 +66,10 @@ class _AbsenMasukScreenState extends State<AbsenMasukScreen> {
 
     final success = await AbsensiService.checkIn(
       token,
-      karKode,
       widget.userPosition!.latitude,
       widget.userPosition!.longitude,
       _selectedStatus!,
-      _keteranganController.text,
+      _keteranganController.text.isEmpty ? null : _keteranganController.text,
     );
 
     if (mounted) {

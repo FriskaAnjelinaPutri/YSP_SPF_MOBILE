@@ -13,10 +13,10 @@ class AbsensiService {
     }
   }
 
-  static Future<Map<String, dynamic>?> getTodayStatus(String token, String karKode) async {
+  static Future<Map<String, dynamic>?> getTodayStatus(String token) async {
     try {
       final response = await http.get(
-        Uri.parse('${ApiService.baseUrl}/absensi/today-status?kar_kode=$karKode'),
+        Uri.parse('${ApiService.baseUrl}/absensi/today-status'),
         headers: {
           'Authorization': 'Bearer $token',
           "Accept": "application/json",
@@ -37,10 +37,10 @@ class AbsensiService {
     }
   }
 
-  static Future<List<Absensi>?> getAbsensi(String token, String karKode, String periode) async {
+  static Future<List<Absensi>?> getAbsensi(String token, String periode) async {
     try {
       final response = await http.get(
-        Uri.parse('${ApiService.baseUrl}/absensi/$periode?kar_kode=$karKode'),
+        Uri.parse('${ApiService.baseUrl}/absensi/$periode'),
         headers: {
           'Authorization': 'Bearer $token',
           "Accept": "application/json",
@@ -62,10 +62,10 @@ class AbsensiService {
      }
   }
 
-  static Future<Absensi?> getAbsensiDetail(String token, String karKode, String tanggal) async {
+  static Future<Absensi?> getAbsensiDetail(String token, String tanggal) async {
     try {
       final response = await http.get(
-        Uri.parse('${ApiService.baseUrl}/absensi/detail/$tanggal?kar_kode=$karKode'),
+        Uri.parse('${ApiService.baseUrl}/absensi/detail/$tanggal'),
         headers: {
           'Authorization': 'Bearer $token',
           "Accept": "application/json",
@@ -86,13 +86,13 @@ class AbsensiService {
     }
   }
 
-  static Future<bool> checkIn(String token, String karKode, double latitude, double longitude, String status, String? keterangan) async {
+  static Future<bool> checkIn(String token, double latitude, double longitude, String status, String? keterangan) async {
     try {
       final body = {
-        'kar_kode': karKode,
         'latitude': latitude,
         'longitude': longitude,
         'status': status,
+        'keterangan': keterangan,
       };
 
       if (keterangan != null && keterangan.isNotEmpty) {
@@ -124,18 +124,12 @@ class AbsensiService {
     }
   }
 
-  static Future<bool> checkOut(String token, String karKode, double latitude, double longitude, String status, String? keterangan) async {
+  static Future<bool> checkOut(String token, double latitude, double longitude) async {
     try {
       final body = {
-        'kar_kode': karKode,
         'latitude': latitude,
         'longitude': longitude,
-        'status': status,
       };
-
-      if (keterangan != null && keterangan.isNotEmpty) {
-        body['keterangan'] = keterangan;
-      }
       
       final response = await http.post(
         Uri.parse('${ApiService.baseUrl}/absensi/check-out'),

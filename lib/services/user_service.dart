@@ -4,7 +4,7 @@ import '../models/user_model.dart';
 
 class UserService {
   // Base URL langsung di sini
-  final String baseUrl = 'http://10.237.26.124:8000/api'; // ganti sesuai URL API Laravel-mu
+  final String baseUrl = 'http://10.101.157.163:8000/api'; // ganti sesuai URL API Laravel-mu
   final String token;
 
   UserService({required this.token});
