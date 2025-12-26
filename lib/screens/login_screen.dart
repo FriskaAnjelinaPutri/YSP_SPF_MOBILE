@@ -25,7 +25,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email dan Password tidak boleh kosong")),
+        const SnackBar(
+          content: Text("Email dan Password tidak boleh kosong"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       setState(() => _isLoading = false);
       return;
@@ -61,7 +65,11 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Login gagal, periksa email/password")),
+        const SnackBar(
+          content: Text("Login gagal, periksa email/password"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
@@ -70,16 +78,13 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE9F8EE),
-
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-
           child: ClipRRect(
             borderRadius: BorderRadius.circular(32),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-
               child: Container(
                 width: 420,
                 padding: const EdgeInsets.all(34),
@@ -114,6 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
+
                 /// ================================================================
 
                 child: Column(
@@ -188,8 +194,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               : Icons.visibility,
                           color: Colors.grey.shade600,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
                       ),
                     ),
 
@@ -202,26 +208,26 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: _isLoading ? null : _login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                          const Color(0xFFDCFCE7).withOpacity(0.95),
+                              const Color(0xFFDCFCE7).withOpacity(0.95),
                           elevation: 4,
                           shadowColor:
-                          const Color(0xFF059669).withOpacity(0.35),
+                              const Color(0xFF059669).withOpacity(0.35),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18),
                           ),
                         ),
                         child: _isLoading
                             ? const CircularProgressIndicator(
-                          color: Color(0xFF064E3B),
-                        )
+                                color: Color(0xFF064E3B),
+                              )
                             : const Text(
-                          "Sign In",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF064E3B),
-                          ),
-                        ),
+                                "Sign In",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF064E3B),
+                                ),
+                              ),
                       ),
                     ),
 
@@ -287,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               decoration: InputDecoration(
                 contentPadding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
                 labelText: label,
                 prefixIcon: Icon(icon, color: const Color(0xFF15803D)),
                 suffixIcon: suffix,

@@ -29,7 +29,11 @@ class _AbsenKeluarScreenState extends State<AbsenKeluarScreen> {
   Future<void> _submitAbsen() async {
     if (widget.userPosition == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lokasi tidak ditemukan, tidak bisa absen.')),
+        const SnackBar(
+          content: Text('Lokasi tidak ditemukan, tidak bisa absen.'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -42,13 +46,17 @@ class _AbsenKeluarScreenState extends State<AbsenKeluarScreen> {
     final token = prefs.getString('token');
 
     if (token == null) {
-      if(mounted) {
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Error: Belum login atau data karyawan tidak ditemukan')),
+            content:
+                Text('Error: Belum login atau data karyawan tidak ditemukan'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
       return;
@@ -66,12 +74,20 @@ class _AbsenKeluarScreenState extends State<AbsenKeluarScreen> {
       });
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Absen Keluar Berhasil!')),
+          const SnackBar(
+            content: Text('Absen Keluar Berhasil!'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal melakukan check-out')),
+          const SnackBar(
+            content: Text('Gagal melakukan check-out'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }

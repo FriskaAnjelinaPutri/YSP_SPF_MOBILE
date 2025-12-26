@@ -7,7 +7,8 @@ class UpdateProfileScreen extends StatefulWidget {
   final UserService userService;
   final UserModel user;
 
-  const UpdateProfileScreen({super.key, required this.userService, required this.user});
+  const UpdateProfileScreen(
+      {super.key, required this.userService, required this.user});
 
   @override
   State<UpdateProfileScreen> createState() => _UpdateProfileScreenState();
@@ -50,7 +51,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     try {
       final updatedUser = await widget.userService.updateProfile(
         email: _emailController.text,
-        password: _passwordController.text.isEmpty ? null : _passwordController.text,
+        password:
+            _passwordController.text.isEmpty ? null : _passwordController.text,
         passwordConfirmation: _passwordConfirmController.text.isEmpty
             ? null
             : _passwordConfirmController.text,
@@ -59,13 +61,21 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Profil berhasil diperbarui")),
+        const SnackBar(
+          content: Text("✅ Profil berhasil diperbarui"),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       Navigator.pop(context, updatedUser);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Gagal memperbarui profil: $e")),
+        SnackBar(
+          content: Text("❌ Gagal memperbarui profil: $e"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -80,7 +90,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: primaryGreen),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: primaryGreen),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -115,7 +126,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: accentGreen.withOpacity(0.35), width: 1.4),
+                      border: Border.all(
+                          color: accentGreen.withOpacity(0.35), width: 1.4),
                       boxShadow: [
                         BoxShadow(
                           color: primaryGreen.withOpacity(0.15),
@@ -159,7 +171,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               // ===== Form Glass =====
               _glassSection("Informasi Akun", [
                 _buildField("Email", _emailController, Icons.email),
-                _buildField("Password", _passwordController, Icons.lock, obscureText: true),
+                _buildField("Password", _passwordController, Icons.lock,
+                    obscureText: true),
                 _buildField(
                   "Konfirmasi Password",
                   _passwordConfirmController,
@@ -192,13 +205,13 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   child: _isSaving
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
-                    "Simpan Perubahan",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                          "Simpan Perubahan",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 40),
@@ -250,20 +263,24 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   }
 
   Widget _buildField(
-      String label,
-      TextEditingController controller,
-      IconData icon, {
-        bool obscureText = false,
-        String? Function(String?)? validator,
-      }) {
+    String label,
+    TextEditingController controller,
+    IconData icon, {
+    bool obscureText = false,
+    String? Function(String?)? validator,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: TextFormField(
         controller: controller,
         obscureText: obscureText,
         validator: validator ??
-                (value) {
+            (value) {
               if (value == null || value.isEmpty) {
+                // Return null for password fields as they are optional
+                if (label.toLowerCase().contains('password')) {
+                  return null;
+                }
                 return '$label tidak boleh kosong';
               }
               return null;
@@ -279,7 +296,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: primaryGreen, width: 1.4),
+            borderSide: const BorderSide(color: primaryGreen, width: 1.4),
           ),
         ),
       ),

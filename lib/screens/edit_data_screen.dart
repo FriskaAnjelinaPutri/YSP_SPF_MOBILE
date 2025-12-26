@@ -111,7 +111,8 @@ class _EditDataScreenState extends State<EditDataScreen> {
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: accentGreen.withOpacity(0.35), width: 1.4),
+                    border: Border.all(
+                        color: accentGreen.withOpacity(0.35), width: 1.4),
                     boxShadow: [
                       BoxShadow(
                         color: primaryGreen.withOpacity(0.15),
@@ -154,7 +155,8 @@ class _EditDataScreenState extends State<EditDataScreen> {
             // KODE KARYAWAN (READ ONLY)
             // =======================
             _glassSection("Identitas Karyawan", [
-              _buildReadOnlyField("Kode Karyawan", _karKodeController, Icons.verified),
+              _buildReadOnlyField(
+                  "Kode Karyawan", _karKodeController, Icons.verified),
             ]),
 
             const SizedBox(height: 20),
@@ -189,13 +191,13 @@ class _EditDataScreenState extends State<EditDataScreen> {
                 child: _isSaving
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text(
-                  "Simpan Perubahan",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
+                        "Simpan Perubahan",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
             const SizedBox(height: 40),
@@ -225,7 +227,8 @@ class _EditDataScreenState extends State<EditDataScreen> {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: accentGreen.withOpacity(0.35), width: 1.4),
+            border: Border.all(
+                color: accentGreen.withOpacity(0.35), width: 1.4),
             boxShadow: [
               BoxShadow(
                 color: primaryGreen.withOpacity(0.15),
@@ -257,7 +260,8 @@ class _EditDataScreenState extends State<EditDataScreen> {
   // =======================
   // FIELD READ ONLY
   // =======================
-  Widget _buildReadOnlyField(String label, TextEditingController controller, IconData icon) {
+  Widget _buildReadOnlyField(
+      String label, TextEditingController controller, IconData icon) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: TextField(
@@ -280,7 +284,8 @@ class _EditDataScreenState extends State<EditDataScreen> {
   // =======================
   // FIELD EDITABLE
   // =======================
-  Widget _buildField(String label, TextEditingController controller, IconData icon) {
+  Widget _buildField(
+      String label, TextEditingController controller, IconData icon) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: TextField(
@@ -296,7 +301,7 @@ class _EditDataScreenState extends State<EditDataScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: primaryGreen, width: 1.4),
+            borderSide: const BorderSide(color: primaryGreen, width: 1.4),
           ),
         ),
       ),
@@ -311,7 +316,11 @@ class _EditDataScreenState extends State<EditDataScreen> {
         _emailController.text.isEmpty ||
         _hpController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("⚠️ Nama, Email & No HP wajib diisi")),
+        const SnackBar(
+          content: Text("⚠️ Nama, Email & No HP wajib diisi"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -334,12 +343,20 @@ class _EditDataScreenState extends State<EditDataScreen> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Profil berhasil diperbarui")),
+        const SnackBar(
+          content: Text("✅ Profil berhasil diperbarui"),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Gagal memperbarui profil")),
+        const SnackBar(
+          content: Text("❌ Gagal memperbarui profil"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }

@@ -48,7 +48,11 @@ class _CutiAddScreenState extends State<CutiAddScreen> {
         mulaiController.text.isEmpty ||
         selesaiController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Semua field wajib diisi")),
+        const SnackBar(
+          content: Text("Semua field wajib diisi"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -71,12 +75,20 @@ class _CutiAddScreenState extends State<CutiAddScreen> {
 
     if (result['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? "Pengajuan berhasil")),
+        SnackBar(
+          content: Text(result['message'] ?? "Pengajuan berhasil"),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? "Pengajuan gagal")),
+        SnackBar(
+          content: Text(result['message'] ?? "Pengajuan gagal"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }

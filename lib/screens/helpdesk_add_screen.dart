@@ -40,7 +40,11 @@ class _HelpdeskAddScreenState extends State<HelpdeskAddScreen> {
         kategoriController.text.isEmpty ||
         deskripsiController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Semua field wajib diisi")),
+        const SnackBar(
+          content: Text("Semua field wajib diisi"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -59,12 +63,20 @@ class _HelpdeskAddScreenState extends State<HelpdeskAddScreen> {
 
     if (result['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? "Helpdesk berhasil dikirim")),
+        SnackBar(
+          content: Text(result['message'] ?? "Helpdesk berhasil dikirim"),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? "Gagal mengirim helpdesk")),
+        SnackBar(
+          content: Text(result['message'] ?? "Gagal mengirim helpdesk"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
@@ -136,7 +148,6 @@ class _HelpdeskAddScreenState extends State<HelpdeskAddScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   // JUDUL
                   TextField(
                     controller: judulController,
@@ -168,9 +179,9 @@ class _HelpdeskAddScreenState extends State<HelpdeskAddScreen> {
                     ),
                     items: const ['Low', 'Medium', 'High']
                         .map((e) => DropdownMenuItem(
-                      value: e,
-                      child: Text(e),
-                    ))
+                              value: e,
+                              child: Text(e),
+                            ))
                         .toList(),
                     onChanged: (value) {
                       setState(() => prioritas = value!);
@@ -206,13 +217,13 @@ class _HelpdeskAddScreenState extends State<HelpdeskAddScreen> {
                       child: loading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
-                        "Kirim Helpdesk",
-                        style: TextStyle(
-                          fontSize: 17,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                              "Kirim Helpdesk",
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
                   ),
                 ],

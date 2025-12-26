@@ -50,7 +50,7 @@ class _LemburAddScreenState extends State<LemburAddScreen> {
 
     if (time != null) {
       controller.text =
-      "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+          "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
     }
   }
 
@@ -76,7 +76,11 @@ class _LemburAddScreenState extends State<LemburAddScreen> {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result["message"])),
+      SnackBar(
+        content: Text(result["message"]),
+        backgroundColor: result["success"] ? Colors.green : Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
     );
 
     if (result["success"]) {
@@ -132,7 +136,8 @@ class _LemburAddScreenState extends State<LemburAddScreen> {
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: accentGreen.withOpacity(0.35), width: 1.4),
+                border: Border.all(
+                    color: accentGreen.withOpacity(0.35), width: 1.4),
                 boxShadow: [
                   BoxShadow(
                     color: primaryGreen.withOpacity(0.15),
@@ -145,13 +150,19 @@ class _LemburAddScreenState extends State<LemburAddScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    _glassTextField("Tanggal", Icons.calendar_today, tanggalC, pilihTanggal),
+                    _glassTextField("Tanggal", Icons.calendar_today, tanggalC,
+                        pilihTanggal),
                     const SizedBox(height: 20),
-                    _glassTextField("Jam Mulai", Icons.access_time, jamMulaiC, () => pilihJam(jamMulaiC)),
+                    _glassTextField("Jam Mulai", Icons.access_time, jamMulaiC,
+                        () => pilihJam(jamMulaiC)),
                     const SizedBox(height: 20),
-                    _glassTextField("Jam Selesai", Icons.access_time, jamSelesaiC, () => pilihJam(jamSelesaiC)),
+                    _glassTextField(
+                        "Jam Selesai", Icons.access_time, jamSelesaiC,
+                        () => pilihJam(jamSelesaiC)),
                     const SizedBox(height: 20),
-                    _glassTextField("Alasan Lembur", Icons.notes, alasanC, null, maxLines: 3),
+                    _glassTextField(
+                        "Alasan Lembur", Icons.notes, alasanC, null,
+                        maxLines: 3),
                     const SizedBox(height: 30),
                     SizedBox(
                       width: double.infinity,
@@ -165,11 +176,13 @@ class _LemburAddScreenState extends State<LemburAddScreen> {
                           ),
                         ),
                         child: loading
-                            ? const CircularProgressIndicator(color: Colors.white)
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
                             : const Text(
-                          "Kirim Pengajuan",
-                          style: TextStyle(fontSize: 17, color: Colors.white),
-                        ),
+                                "Kirim Pengajuan",
+                                style: TextStyle(
+                                    fontSize: 17, color: Colors.white),
+                              ),
                       ),
                     ),
                   ],
@@ -202,13 +215,13 @@ class _LemburAddScreenState extends State<LemburAddScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: primaryGreen, width: 2),
+        borderSide: const BorderSide(color: primaryGreen, width: 2),
       ),
     );
   }
 
-  Widget _glassTextField(String label, IconData icon, TextEditingController controller,
-      VoidCallback? onTap,
+  Widget _glassTextField(String label, IconData icon,
+      TextEditingController controller, VoidCallback? onTap,
       {int maxLines = 1}) {
     return TextFormField(
       controller: controller,

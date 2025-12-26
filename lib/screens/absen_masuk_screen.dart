@@ -19,7 +19,13 @@ class _AbsenMasukScreenState extends State<AbsenMasukScreen> {
   bool _isLoading = false;
   String? _selectedStatus;
   final TextEditingController _keteranganController = TextEditingController();
-  final List<String> _statuses = ['Hadir', 'Terlambat', 'Izin', 'Sakit', 'Alpha'];
+  final List<String> _statuses = [
+    'Hadir',
+    'Terlambat',
+    'Izin',
+    'Sakit',
+    'Alpha'
+  ];
 
   static const primaryGreen = Color(0xFF064E3B);
   static const softGreen = Color(0xFFDCFCE7);
@@ -33,13 +39,21 @@ class _AbsenMasukScreenState extends State<AbsenMasukScreen> {
   Future<void> _submitAbsen() async {
     if (widget.userPosition == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lokasi tidak ditemukan, tidak bisa absen.')),
+        const SnackBar(
+          content: Text('Lokasi tidak ditemukan, tidak bisa absen.'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
     if (_selectedStatus == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan pilih status kehadiran.')),
+        const SnackBar(
+          content: Text('Silakan pilih status kehadiran.'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -52,13 +66,17 @@ class _AbsenMasukScreenState extends State<AbsenMasukScreen> {
     final token = prefs.getString('token');
 
     if (token == null) {
-      if(mounted) {
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Error: Belum login atau data karyawan tidak ditemukan')),
+            content:
+                Text('Error: Belum login atau data karyawan tidak ditemukan'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
       return;
@@ -78,12 +96,20 @@ class _AbsenMasukScreenState extends State<AbsenMasukScreen> {
       });
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Absen Masuk Berhasil!')),
+          const SnackBar(
+            content: Text('Absen Masuk Berhasil!'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal melakukan check-in')),
+          const SnackBar(
+            content: Text('Gagal melakukan check-in'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
@@ -238,7 +264,8 @@ class _AbsenMasukScreenState extends State<AbsenMasukScreen> {
               ),
               border: InputBorder.none,
             ),
-            style: const TextStyle(color: primaryGreen, fontWeight: FontWeight.w600),
+            style:
+                const TextStyle(color: primaryGreen, fontWeight: FontWeight.w600),
             dropdownColor: softGreen,
           ),
         ),
