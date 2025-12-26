@@ -1,5 +1,7 @@
 import 'dart:ui';
+import 'package:apk_absebsi/screens/about_us_screen.dart';
 import 'package:apk_absebsi/screens/helpdesk_list_screen.dart';
+import 'package:apk_absebsi/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:apk_absebsi/screens/akun_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,7 +61,14 @@ class SettingScreen extends StatelessWidget {
                   icon: Icons.group,
                   title: "User",
                   subtitle: "Manajemen pengguna",
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => ProfileScreen(token: token),
+                      ),
+                    ) ;
+                  },
                 ),
                 const SizedBox(height: 12),
 
@@ -82,7 +91,14 @@ class SettingScreen extends StatelessWidget {
                   icon: Icons.info_outline,
                   title: "About Us",
                   subtitle: "Tentang aplikasi",
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => AboutUsScreen(),
+                      ),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 350), 

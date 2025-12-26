@@ -4,14 +4,12 @@ import '../models/helpdesk_model.dart';
 import '../services/helpdesk_service.dart';
 import 'helpdesk_add_screen.dart';
 import 'helpdesk_detail_screen.dart';
+import 'setting_screen.dart'; // pastikan path-nya sesuai
 
 class HelpdeskListScreen extends StatefulWidget {
   final String token;
 
-  const HelpdeskListScreen({
-    super.key,
-    required this.token,
-  });
+  const HelpdeskListScreen({super.key, required this.token});
 
   @override
   State<HelpdeskListScreen> createState() => _HelpdeskListScreenState();
@@ -20,8 +18,7 @@ class HelpdeskListScreen extends StatefulWidget {
 class _HelpdeskListScreenState extends State<HelpdeskListScreen> {
   late Future<List<Helpdesk>> helpdeskList;
 
-  // WARNA SESUAI DASHBOARD
-  static const primaryGreen = Color(0xFF064E3B);
+  static const mainGreen = Color(0xFF064E3B);
   static const softGreen = Color(0xFFDCFCE7);
   static const accentGreen = Color(0xFF34D399);
 
@@ -49,65 +46,49 @@ class _HelpdeskListScreenState extends State<HelpdeskListScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFE9F8EE),
 
-      // =============================
-      //        GLASS APPBAR
-      // =============================
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-            child: AppBar(
-              backgroundColor: softGreen.withOpacity(0.65),
-              elevation: 0,
-              leading: const SizedBox(),
-              title: const Text(
-                "Helpdesk",
-                style: TextStyle(
-                  color: primaryGreen,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 22,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => SettingScreen(token: widget.token),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Container(
+                  color: Colors.white.withOpacity(0.35),
+                  child: const Icon(Icons.arrow_back_ios_new_rounded,
+                      color: mainGreen, size: 20),
                 ),
               ),
-              centerTitle: true,
             ),
           ),
         ),
-      ),
-
-      // =============================
-      //        FAB GLASS
-      // =============================
-      floatingActionButton: ClipRRect(
-        borderRadius: BorderRadius.circular(40),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: FloatingActionButton(
-            elevation: 4,
-            backgroundColor: softGreen.withOpacity(0.65),
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => HelpdeskAddScreen(token: widget.token),
-                ),
-              );
-              if (result == true) _refresh();
-            },
-            child: const Icon(Icons.add, color: primaryGreen),
+        title: const Text(
+          "Helpdesk",
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: mainGreen,
           ),
         ),
       ),
 
-      // =============================
-      //            BODY
-      // =============================
       body: FutureBuilder<List<Helpdesk>>(
         future: helpdeskList,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: primaryGreen),
+              child: CircularProgressIndicator(color: mainGreen),
             );
           }
 
@@ -124,10 +105,7 @@ class _HelpdeskListScreenState extends State<HelpdeskListScreen> {
             return const Center(
               child: Text(
                 "Belum ada tiket helpdesk",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: primaryGreen,
-                ),
+                style: TextStyle(color: mainGreen, fontSize: 16),
               ),
             );
           }
@@ -135,7 +113,7 @@ class _HelpdeskListScreenState extends State<HelpdeskListScreen> {
           final data = snapshot.data!;
 
           return RefreshIndicator(
-            color: primaryGreen,
+            color: mainGreen,
             onRefresh: _refresh,
             child: ListView.builder(
               padding: const EdgeInsets.all(18),
@@ -146,63 +124,37 @@ class _HelpdeskListScreenState extends State<HelpdeskListScreen> {
                 return _glassCard(
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-
-                    // ICON KIRI
+                        horizontal: 14, vertical: 10),
                     leading: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: accentGreen.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Icon(
-                        Icons.support_agent,
-                        color: primaryGreen,
-                      ),
+                      child: const Icon(Icons.support_agent, color: mainGreen),
                     ),
-
-                    // TITLE
-                    title: Text(
-                      item.judul,
-                      style: const TextStyle(
-                        color: primaryGreen,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-
-                    // SUBTITLE
+                    title: Text(item.judul,
+                        style: const TextStyle(
+                            color: mainGreen,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16)),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Kategori: ${item.kategori}",
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          Text(
-                            "Tanggal: ${item.tanggalFormatted}",
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.black87,
-                            ),
-                          ),
+                          Text("Kategori: ${item.kategori}",
+                              style: const TextStyle(
+                                  fontSize: 13, color: Colors.black87)),
+                          Text("Tanggal: ${item.tanggalFormatted}",
+                              style: const TextStyle(
+                                  fontSize: 13, color: Colors.black87)),
                         ],
                       ),
                     ),
-
-                    // STATUS
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
+                          horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         color: _statusColor(item.status),
                         borderRadius: BorderRadius.circular(8),
@@ -216,18 +168,15 @@ class _HelpdeskListScreenState extends State<HelpdeskListScreen> {
                         ),
                       ),
                     ),
-
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      final refresh = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => HelpdeskDetailScreen(
-                            helpdesk: item,
-                          ),
+                          builder: (_) =>
+                              HelpdeskDetailScreen(helpdesk: item),
                         ),
-                      ).then((refresh) {
-                        if (refresh == true) _refresh();
-                      });
+                      );
+                      if (refresh == true) _refresh();
                     },
                   ),
                 );
@@ -236,12 +185,30 @@ class _HelpdeskListScreenState extends State<HelpdeskListScreen> {
           );
         },
       ),
+
+      floatingActionButton: ClipRRect(
+        borderRadius: BorderRadius.circular(40),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: FloatingActionButton(
+            elevation: 4,
+            backgroundColor: softGreen.withOpacity(0.65),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => HelpdeskAddScreen(token: widget.token),
+                ),
+              );
+              if (result == true) _refresh();
+            },
+            child: const Icon(Icons.add, color: mainGreen),
+          ),
+        ),
+      ),
     );
   }
 
-  // =====================================================
-  // GLASS CARD STYLE (SAMA DENGAN LEMBUR)
-  // =====================================================
   Widget _glassCard({required Widget child}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -254,22 +221,18 @@ class _HelpdeskListScreenState extends State<HelpdeskListScreen> {
               gradient: LinearGradient(
                 colors: [
                   softGreen.withOpacity(0.75),
-                  Colors.white.withOpacity(0.25),
+                  Colors.white.withOpacity(0.25)
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: accentGreen.withOpacity(0.35),
-                width: 1.4,
-              ),
+              border: Border.all(color: accentGreen.withOpacity(0.35), width: 1.4),
               boxShadow: [
                 BoxShadow(
-                  color: primaryGreen.withOpacity(0.15),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
+                    color: mainGreen.withOpacity(0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8))
               ],
             ),
             child: child,
@@ -279,9 +242,6 @@ class _HelpdeskListScreenState extends State<HelpdeskListScreen> {
     );
   }
 
-  // =====================================================
-  // STATUS COLOR
-  // =====================================================
   Color _statusColor(String status) {
     switch (status.toUpperCase()) {
       case "OPEN":
