@@ -8,6 +8,8 @@ import 'package:apk_absebsi/screens/lembur_list_screen.dart';
 import 'package:apk_absebsi/screens/absen_masuk_screen.dart';
 import 'package:apk_absebsi/screens/absen_keluar_screen.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:apk_absebsi/services/absensi_service.dart';
+import 'package:apk_absebsi/models/absensi_model.dart';
 
 class HomeScreen extends StatefulWidget {
   final String namaPegawai;
@@ -33,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Position? _currentPosition;
   String _locationStatus = "Mencari Lokasi...";
   bool _isFetchingLocation = false;
+  late Future<List<Absensi>?> _absensiHistory;
 
   static const primaryGreen = Color(0xFF064E3B);
   static const softGreen = Color(0xFFDCFCE7);
@@ -41,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _absensiHistory = _fetchAbsensiHistory();
     _pages = [
       _buildHomePage(),
       CutiListScreen(token: widget.token, karKode: widget.karKode),
@@ -50,6 +54,10 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getCurrentLocation();
     });
+  }
+
+  Future<List<Absensi>?> _fetchAbsensiHistory() {
+    return AbsensiService.getAbsensi(widget.token, 'this-month');
   }
 
   Future<void> _getCurrentLocation() async {
@@ -145,7 +153,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHomePage() {
-    final formattedDate = DateFormat('EEEE, d MMMM yyyy').format(DateTime.now());
+    final formattedDate =
+        DateFormat('EEEE, d MMMM yyyy').format(DateTime.now());
     final formattedTime = DateFormat('hh:mm a').format(DateTime.now());
 
     return SingleChildScrollView(
@@ -196,17 +205,90 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             children: [
               Expanded(
-                child: _glassInfoCard(
-                    Icons.access_time_rounded, "Working Hours", "168h total"),
+                child: _glassInfoCard(Icons.access_time_rounded,
+                    "Working Hours", "168h total"),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _glassInfoCard(
-                    Icons.calendar_month_rounded, "Leave Days", "5 / 20 used"),
+                child: _glassInfoCard(Icons.calendar_month_rounded,
+                    "Leave Days", "5 / 20 used"),
               ),
             ],
           ),
+          _buildAbsenHistorySection(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAbsenHistorySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 28),
+        const Text(
+          "Riwayat Absensi",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: primaryGreen,
+          ),
+        ),
+        const SizedBox(height: 16),
+        FutureBuilder<List<Absensi>?>(
+          future: _absensiHistory,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('Tidak ada riwayat absensi.'));
+            }
+
+            final history = snapshot.data!;
+            final recentHistory = history.take(3).toList();
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: recentHistory.length,
+              itemBuilder: (context, index) {
+                final absensi = recentHistory[index];
+                return _buildHistoryItem(absensi);
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHistoryItem(Absensi absensi) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor:
+              absensi.status == 'Hadir' ? Colors.green : Colors.orange,
+          child: Icon(
+              absensi.status == 'Hadir'
+                  ? Icons.check
+                  : Icons.warning_amber_rounded,
+              color: Colors.white),
+        ),
+        title: Text(
+          '${absensi.status} - ${DateFormat('d MMMM yyyy').format(DateTime.parse(absensi.tanggal))}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle:
+            Text('Masuk: ${absensi.jamMasuk} - Keluar: ${absensi.jamKeluar ?? '-'}'),
+        trailing: const Icon(Icons.arrow_forward_ios),
+        onTap: () {
+          // Maybe navigate to a detail screen? For now, nothing.
+        },
       ),
     );
   }
@@ -261,7 +343,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: accentGreen.withAlpha(89), width: 1.4), // 0.35
+            border:
+                Border.all(color: accentGreen.withAlpha(89), width: 1.4), // 0.35
             boxShadow: [
               BoxShadow(
                 color: primaryGreen.withAlpha(64), // 0.25
@@ -295,7 +378,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                   else
                     Icon(
-                      _currentPosition != null ? Icons.location_on : Icons.location_off,
+                      _currentPosition != null
+                          ? Icons.location_on
+                          : Icons.location_off,
                       size: 20,
                       color: primaryGreen,
                     ),
@@ -303,7 +388,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Flexible(
                     child: Text(
                       _locationStatus,
-                      style: const TextStyle(fontSize: 15, color: primaryGreen),
+                      style:
+                          const TextStyle(fontSize: 15, color: primaryGreen),
                     ),
                   ),
                   if (_locationStatus == "Gagal Mendapatkan Lokasi")
@@ -321,10 +407,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _glassButton(
-                      "Clock In", AbsenMasukScreen(userPosition: _currentPosition)),
-                  _glassButton(
-                      "Clock Out", AbsenKeluarScreen(userPosition: _currentPosition)),
+                  _glassButton("Clock In",
+                      AbsenMasukScreen(userPosition: _currentPosition)),
+                  _glassButton("Clock Out",
+                      AbsenKeluarScreen(userPosition: _currentPosition)),
                 ],
               ),
             ],
