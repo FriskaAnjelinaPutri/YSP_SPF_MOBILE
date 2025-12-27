@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:apk_absebsi/models/absensi_history_model.dart';
+import 'package:apk_absebsi/screens/absensi_detail_screen.dart';
 import 'package:apk_absebsi/screens/setting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:apk_absebsi/screens/akun_screen.dart';
@@ -35,7 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Position? _currentPosition;
   String _locationStatus = "Mencari Lokasi...";
   bool _isFetchingLocation = false;
-  late Future<List<Absensi>?> _absensiHistory;
+  late Future<AbsensiHistory?> _absensiHistory;
+  late Future<Map<String, dynamic>?> _todayStatusFuture;
 
   static const primaryGreen = Color(0xFF064E3B);
   static const softGreen = Color(0xFFDCFCE7);
@@ -44,20 +47,29 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _absensiHistory = _fetchAbsensiHistory();
+    _loadData();
+  }
+
+  void _loadData() {
+    // Hitung periode bulan ini otomatis
+    final String currentPeriode = DateFormat('yyyy-MM').format(DateTime.now());
+    _absensiHistory = AbsensiService.getAbsensi(widget.token, currentPeriode);
+    _todayStatusFuture = _fetchTodayStatus();
+
     _pages = [
       _buildHomePage(),
       CutiListScreen(token: widget.token, karKode: widget.karKode),
       LemburListScreen(token: widget.token),
       SettingScreen(token: widget.token),
     ];
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getCurrentLocation();
     });
   }
 
-  Future<List<Absensi>?> _fetchAbsensiHistory() {
-    return AbsensiService.getAbsensi(widget.token, 'this-month');
+  Future<Map<String, dynamic>?> _fetchTodayStatus() {
+    return AbsensiService.getTodayStatus(widget.token);
   }
 
   Future<void> _getCurrentLocation() async {
@@ -157,77 +169,71 @@ class _HomeScreenState extends State<HomeScreen> {
         DateFormat('EEEE, d MMMM yyyy').format(DateTime.now());
     final formattedTime = DateFormat('hh:mm a').format(DateTime.now());
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(22),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Welcome 👋",
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: primaryGreen.withAlpha(153), // 0.6
-                        fontWeight: FontWeight.w500,
+    return RefreshIndicator(
+      onRefresh: () async {
+        setState(() {
+          _loadData();
+        });
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Welcome 👋",
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: primaryGreen.withAlpha(153), // 0.6
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.namaPegawai,
-                      style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: primaryGreen,
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.namaPegawai,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: primaryGreen,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      formattedDate,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: primaryGreen.withAlpha(140), // 0.55
+                      const SizedBox(height: 6),
+                      Text(
+                        formattedDate,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: primaryGreen.withAlpha(140), // 0.55
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              _glassAvatar(widget.namaPegawai),
-            ],
-          ),
-          const SizedBox(height: 30),
-          _glassClockCard(formattedTime),
-          const SizedBox(height: 28),
-          Row(
-            children: [
-              Expanded(
-                child: _glassInfoCard(Icons.access_time_rounded,
-                    "Working Hours", "168h total"),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _glassInfoCard(Icons.calendar_month_rounded,
-                    "Leave Days", "5 / 20 used"),
-              ),
-            ],
-          ),
-          _buildAbsenHistorySection(),
-        ],
+                _glassAvatar(widget.namaPegawai),
+              ],
+            ),
+            const SizedBox(height: 30),
+            _glassClockCard(formattedTime),
+            const SizedBox(height: 10),
+            _buildAbsenHistorySection(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildAbsenHistorySection() {
+  Widget _buildAbsenSummarySection(Map<String, dynamic> summary) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 28),
         const Text(
-          "Riwayat Absensi",
+          "Ringkasan Absensi Bulan Ini",
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
@@ -235,21 +241,73 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        FutureBuilder<List<Absensi>?>(
-          future: _absensiHistory,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('Tidak ada riwayat absensi.'));
-            }
+        Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: _glassInfoCard(Icons.check_circle_outline, "Hadir",
+                      (summary['total_hadir'] ?? 0).toString()),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _glassInfoCard(Icons.pending_actions_outlined, "Izin",
+                      (summary['total_izin'] ?? 0).toString()),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _glassInfoCard(Icons.sick_outlined, "Sakit",
+                      (summary['total_sakit'] ?? 0).toString()),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _glassInfoCard(Icons.cancel_outlined, "Alpha",
+                      (summary['total_alpha'] ?? 0).toString()),
+                ),
+              ],
+            ),
+          ],
+        )
+      ],
+    );
+  }
 
-            final history = snapshot.data!;
-            final recentHistory = history.take(3).toList();
+  Widget _buildAbsenHistorySection() {
+    return FutureBuilder<AbsensiHistory?>(
+      future: _absensiHistory,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.history.isEmpty) {
+          return const Center(child: Text('Tidak ada riwayat absensi.'));
+        }
 
-            return ListView.builder(
+        final absensiData = snapshot.data!;
+        final summary = absensiData.summary;
+        final history = absensiData.history;
+        final recentHistory = history.take(3).toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildAbsenSummarySection(summary),
+            const SizedBox(height: 16),
+            const Text(
+              "Riwayat Absensi",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: primaryGreen,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: recentHistory.length,
@@ -257,38 +315,115 @@ class _HomeScreenState extends State<HomeScreen> {
                 final absensi = recentHistory[index];
                 return _buildHistoryItem(absensi);
               },
-            );
-          },
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 
+  Color _statusColor(String? status) {
+    switch (status) {
+      case 'Hadir':
+        return Colors.green.shade600;
+      case 'Izin':
+        return Colors.blue.shade600;
+      case 'Sakit':
+        return Colors.orange.shade700;
+      default:
+        return Colors.red.shade600;
+    }
+  }
+
   Widget _buildHistoryItem(Absensi absensi) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return _glassCard(
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor:
-              absensi.status == 'Hadir' ? Colors.green : Colors.orange,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: accentGreen.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(14),
+          ),
           child: Icon(
               absensi.status == 'Hadir'
-                  ? Icons.check
+                  ? Icons.check_circle_outline
                   : Icons.warning_amber_rounded,
-              color: Colors.white),
+              color: primaryGreen),
         ),
         title: Text(
-          '${absensi.status} - ${DateFormat('d MMMM yyyy').format(DateTime.parse(absensi.tanggal))}',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          DateFormat('EEEE, d MMMM yyyy').format(DateTime.parse(absensi.tanggal)),
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            color: primaryGreen,
+            fontSize: 16,
+          ),
         ),
-        subtitle:
-            Text('Masuk: ${absensi.jamMasuk} - Keluar: ${absensi.jamKeluar ?? '-'}'),
-        trailing: const Icon(Icons.arrow_forward_ios),
+        subtitle: Text(
+          'Masuk: ${absensi.jamMasuk} - Keluar: ${absensi.jamKeluar ?? '-'}',
+          style: const TextStyle(fontSize: 13, color: Colors.black87),
+        ),
+        trailing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: _statusColor(absensi.status),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            absensi.status,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
         onTap: () {
-          // Maybe navigate to a detail screen? For now, nothing.
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AbsensiDetailScreen(absensi: absensi),
+            ),
+          ).then((_) => setState(() => _loadData()));
         },
+      ),
+    );
+  }
+
+  Widget _glassCard({required Widget child}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  softGreen.withOpacity(0.75),
+                  Colors.white.withOpacity(0.25),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: accentGreen.withOpacity(0.35),
+                width: 1.4,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: primaryGreen.withOpacity(0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: child,
+          ),
+        ),
       ),
     );
   }
@@ -403,6 +538,49 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                 ],
               ),
+              const SizedBox(height: 16),
+              FutureBuilder<Map<String, dynamic>?>(
+                future: _todayStatusFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(
+                      height: 20,
+                      child: Center(
+                          child:
+                              CircularProgressIndicator(strokeWidth: 2.0, color: primaryGreen,)),
+                    );
+                  } else if (snapshot.hasError) {
+                    return const Text('Gagal memuat status',
+                        style: TextStyle(color: Colors.red));
+                  }
+
+                  String status;
+                  final data = snapshot.data;
+                  if (data != null && data['jam_masuk'] != null) {
+                    if (data['jam_keluar'] != null) {
+                      status = 'Sudah Absen Keluar';
+                    } else {
+                      status = 'Sudah Absen Masuk';
+                    }
+                  } else {
+                    status = 'Belum Absen';
+                  }
+
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: primaryGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "Status Hari Ini: $status",
+                      style: const TextStyle(
+                          color: primaryGreen, fontWeight: FontWeight.bold),
+                    ),
+                  );
+                },
+              ),
               const SizedBox(height: 26),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -426,8 +604,17 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 52,
       child: ElevatedButton(
         onPressed: _currentPosition != null
-            ? () =>
-                Navigator.push(context, MaterialPageRoute(builder: (_) => page))
+            ? () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => page),
+                );
+                if (result == true) {
+                  setState(() {
+                    _loadData();
+                  });
+                }
+              }
             : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: softGreen.withAlpha(242), // 0.95
@@ -455,7 +642,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -467,28 +654,22 @@ class _HomeScreenState extends State<HomeScreen> {
             border: Border.all(color: accentGreen.withAlpha(89)), // 0.35
           ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: accentGreen.withAlpha(51), // 0.2
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(icon, size: 32, color: primaryGreen),
-              ),
-              const SizedBox(height: 14),
+              Icon(icon, size: 28, color: primaryGreen),
+              const SizedBox(height: 10),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 13,
                   color: primaryGreen.withAlpha(179), // 0.7
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 4),
               Text(
                 value,
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: primaryGreen,
                 ),

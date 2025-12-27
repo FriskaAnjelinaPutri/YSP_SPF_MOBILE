@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:apk_absebsi/models/absensi_model.dart';
+import 'package:apk_absebsi/models/absensi_history_model.dart';
 import 'package:apk_absebsi/services/api_services.dart';
 
 class AbsensiService {
@@ -37,29 +38,46 @@ class AbsensiService {
     }
   }
 
-  static Future<List<Absensi>?> getAbsensi(String token, String periode) async {
+  static Future<AbsensiHistory?> getAbsensi(
+    String token,
+    String periode,
+  ) async {
     try {
-      final response = await http.get(
-        Uri.parse('${ApiService.baseUrl}/absensi/$periode'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          "Accept": "application/json",
-        },
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(
+            Uri.parse('${ApiService.baseUrl}/absensi/$periode'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              "Accept": "application/json",
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       final data = _parseJson(response.body);
 
-      if (response.statusCode == 200 && data != null) {
-        final list = data['data'] as List;
-        return list.map((item) => Absensi.fromJson(item)).toList();
+      if (response.statusCode == 200 &&
+          data != null &&
+          data['success'] == true) {
+        // Ambil summary dan data dari response
+        final Map<String, dynamic> summary = data['summary'];
+        final List<dynamic> listData = data['data'];
+
+        // Konversi list data ke List<Absensi>
+        final List<Absensi> history =
+            listData.map((item) => Absensi.fromJson(item)).toList();
+
+        // Return AbsensiHistory yang dibuat manual
+        return AbsensiHistory(summary: summary, history: history);
       } else {
-        print("❌ Gagal ambil data absensi: ${response.statusCode} - ${data?['message'] ?? response.body}");
+        print(
+          "❌ Gagal ambil data absensi: ${response.statusCode} - ${data?['message'] ?? response.body}",
+        );
         return null;
       }
     } catch (e) {
       print("⚠️ Error getAbsensi: $e");
       return null;
-     }
+    }
   }
 
   static Future<Absensi?> getAbsensiDetail(String token, String tanggal) async {
