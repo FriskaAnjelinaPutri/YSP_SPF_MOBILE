@@ -26,8 +26,8 @@ class AbsensiService {
 
       final data = _parseJson(response.body);
 
-      if (response.statusCode == 200 && data != null) {
-        return data;
+      if (response.statusCode == 200 && data != null && data['success'] == true) {
+        return data['data'];
       } else {
         print("❌ Gagal ambil status hari ini: ${response.statusCode} - ${data?['message'] ?? response.body}");
         return null;
@@ -80,7 +80,7 @@ class AbsensiService {
     }
   }
 
-  static Future<Absensi?> getAbsensiDetail(String token, String tanggal) async {
+  static Future<Map<String, dynamic>?> getAbsensiDetail(String token, String tanggal) async {
     try {
       final response = await http.get(
         Uri.parse('${ApiService.baseUrl}/absensi/detail/$tanggal'),
@@ -92,8 +92,8 @@ class AbsensiService {
 
       final data = _parseJson(response.body);
 
-      if (response.statusCode == 200 && data != null) {
-        return Absensi.fromJson(data['data']);
+      if (response.statusCode == 200 && data != null && data['success'] == true) {
+        return data['data'];
       } else {
         print("❌ Gagal ambil detail absensi: ${response.statusCode} - ${data?['message'] ?? response.body}");
         return null;

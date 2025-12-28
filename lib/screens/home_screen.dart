@@ -383,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AbsensiDetailScreen(absensi: absensi),
+              builder: (context) => AbsensiDetailScreen(token: widget.token, tanggal: absensi.tanggal),
             ),
           ).then((_) => setState(() => _loadData()));
         },
@@ -556,8 +556,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   String status;
                   final data = snapshot.data;
-                  if (data != null && data['jam_masuk'] != null) {
-                    if (data['jam_keluar'] != null) {
+                  if (data != null && data['sudah_check_in'] == true) {
+                    if (data['sudah_check_out'] == true) {
                       status = 'Sudah Absen Keluar';
                     } else {
                       status = 'Sudah Absen Masuk';

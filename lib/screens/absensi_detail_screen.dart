@@ -2,51 +2,33 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:apk_absebsi/models/absensi_model.dart';
 import 'package:intl/intl.dart';
+import 'package:apk_absebsi/services/absensi_service.dart'; // Import service
 
-class AbsensiDetailScreen extends StatelessWidget {
-  final Absensi absensi;
+class AbsensiDetailScreen extends StatefulWidget {
+  final String token;
+  final String tanggal;
 
-  const AbsensiDetailScreen({super.key, required this.absensi});
+  const AbsensiDetailScreen({super.key, required this.token, required this.tanggal});
+
+  @override
+  State<AbsensiDetailScreen> createState() => _AbsensiDetailScreenState();
+}
+
+class _AbsensiDetailScreenState extends State<AbsensiDetailScreen> {
+  late Future<Map<String, dynamic>?> _detailDataFuture;
 
   static const primaryGreen = Color(0xFF064E3B);
   static const softGreen = Color(0xFFDCFCE7);
   static const accentGreen = Color(0xFF34D399);
 
-  String _calculateDuration(String jamMasuk, String? jamKeluar) {
-    if (jamKeluar == null) {
-      return "Belum Absen Keluar";
-    }
-
-    try {
-      // Combine the date with the time to create a full DateTime object
-      final clockIn = DateTime.parse("${absensi.tanggal} $jamMasuk");
-      final clockOut = DateTime.parse("${absensi.tanggal} $jamKeluar");
-
-      final duration = clockOut.difference(clockIn);
-
-      final hours = duration.inHours;
-      final minutes = duration.inMinutes.remainder(60);
-
-      String result = "";
-      if (hours > 0) {
-        result += "$hours jam ";
-      }
-      if (minutes > 0) {
-        result += "$minutes menit";
-      }
-      
-      return result.isEmpty ? "0 menit" : result.trim();
-
-    } catch (e) {
-      // Return a more descriptive error if parsing fails
-      return "Format Waktu Salah";
-    }
+  @override
+  void initState() {
+    super.initState();
+    _detailDataFuture = AbsensiService.getAbsensiDetail(widget.token, widget.tanggal);
   }
 
   @override
   Widget build(BuildContext context) {
-    final String durasiKerja = _calculateDuration(absensi.jamMasuk, absensi.jamKeluar);
-
     return Scaffold(
       backgroundColor: const Color(0xFFE9F8EE),
       appBar: PreferredSize(
@@ -74,56 +56,74 @@ class AbsensiDetailScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      softGreen.withOpacity(0.75),
-                      Colors.white.withOpacity(0.25),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: accentGreen.withOpacity(0.35),
-                    width: 1.4,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryGreen.withOpacity(0.15),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
+      body: FutureBuilder<Map<String, dynamic>?>(
+        future: _detailDataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator(color: primaryGreen));
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return const Center(child: Text('Detail absensi tidak ditemukan.', style: TextStyle(color: primaryGreen)));
+          }
+
+          final detailData = snapshot.data!;
+          final absensiMap = detailData['absensi'];
+          final Absensi absensi = Absensi.fromJson(absensiMap);
+          final String durasiKerja = detailData['durasi_kerja'] ?? 'Belum Absen Keluar';
+
+          return Padding(
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          softGreen.withOpacity(0.75),
+                          Colors.white.withOpacity(0.25),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: accentGreen.withOpacity(0.35),
+                        width: 1.4,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryGreen.withOpacity(0.15),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _detailItem("Tanggal",
-                        DateFormat('EEEE, d MMMM yyyy').format(DateTime.parse(absensi.tanggal))),
-                    const SizedBox(height: 16),
-                    _detailItem("Jam Masuk", absensi.jamMasuk),
-                    const SizedBox(height: 16),
-                    _detailItem("Jam Keluar", absensi.jamKeluar ?? '-'),
-                    const SizedBox(height: 16),
-                    _detailItem("Durasi Kerja", durasiKerja),
-                    const SizedBox(height: 16),
-                    _statusBadge(absensi.status),
-                  ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _detailItem("Tanggal",
+                            DateFormat('EEEE, d MMMM yyyy').format(DateTime.parse(absensi.tanggal))),
+                        const SizedBox(height: 16),
+                        _detailItem("Jam Masuk", absensi.jamMasuk),
+                        const SizedBox(height: 16),
+                        _detailItem("Jam Keluar", absensi.jamKeluar ?? '-'),
+                        const SizedBox(height: 16),
+                        _detailItem("Durasi Kerja", durasiKerja),
+                        const SizedBox(height: 16),
+                        _statusBadge(absensi.status),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
