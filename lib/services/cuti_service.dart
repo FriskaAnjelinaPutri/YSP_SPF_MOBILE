@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class CutiService {
-  static const String baseUrl = "http://10.101.157.163:8000/api";
+  // ✅ Ganti sesuai IP Backend kamu
+  static const String baseUrl = "http://127.0.0.1:8001/api";
 
   // ✅ Ambil semua riwayat cuti berdasarkan kar_kode
   static Future<List<dynamic>> getAllCuti(String token, String karKode) async {
@@ -10,7 +11,10 @@ class CutiService {
 
     final response = await http.get(
       url,
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
     );
 
     final body = jsonDecode(response.body);
@@ -61,7 +65,10 @@ class CutiService {
 
     final response = await http.get(
       url,
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
     );
 
     final body = jsonDecode(response.body);
@@ -83,7 +90,10 @@ class CutiService {
 
     final response = await http.delete(
       url,
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
     );
 
     final body = jsonDecode(response.body);

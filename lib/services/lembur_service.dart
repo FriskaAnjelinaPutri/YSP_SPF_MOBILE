@@ -2,18 +2,23 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class LemburService {
-  static const String baseUrl = "http://10.101.157.163:8000/api";
+  static const String baseUrl = "http://127.0.0.1:8001/api";
 
   // ============================================================
   // 1️⃣ RIWAYAT LEMBUR
   // Route Laravel: GET /lembur/riwayat/all
   // ============================================================
-  static Future<List<dynamic>> getRiwayat({required String token}) async {
+  static Future<List<dynamic>> getRiwayat({
+    required String token,
+  }) async {
     final url = Uri.parse('$baseUrl/lembur/riwayat/all');
 
     final response = await http.get(
       url,
-      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      },
     );
 
     final body = jsonDecode(response.body);
@@ -60,7 +65,10 @@ class LemburService {
 
     final response = await http.get(
       url,
-      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      },
     );
 
     final body = jsonDecode(response.body);
@@ -84,7 +92,10 @@ class LemburService {
 
     final response = await http.delete(
       url,
-      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      },
     );
 
     return jsonDecode(response.body);
